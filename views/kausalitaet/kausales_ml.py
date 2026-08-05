@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from sklearn.ensemble import RandomForestRegressor
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten, vertiefung
 
 kapitel_kopf(
     "🎯",
@@ -63,19 +63,36 @@ Effekt von $D$ auf $Y$ unter Kontrolle von $X$ steckt vollständig in den
 3. Die Regression von $\tilde{Y}$ auf $\tilde{D}$ liefert $\hat{\tau}$.
 
 DML ersetzt die bedingten Erwartungswerte in Schritt 1–2 durch beliebige
-ML-Verfahren (Random Forest, Boosting, neuronale Netze) und sichert das
-Resultat mit zwei Bausteinen ab:
-
-- **Cross-Fitting:** Die Vorhersage für jede Beobachtung stammt von einem
-  Modell, das diese Beobachtung nie im Training gesehen hat. Andernfalls
-  überträgt sich Overfitting auf die Residuen.
-- **Neyman-Orthogonalität:** Die Momentenbedingung
-  $E\big[(\tilde{Y} - \tau\,\tilde{D})\,\tilde{D}\big] = 0$ ist so
-  konstruiert, dass sich Schätzfehler in $\hat{g}$ und $\hat{m}$ nur in
-  zweiter Ordnung auf $\hat{\tau}$ auswirken. ML darf also unpräzise sein,
-  solange beide Nuisance-Schätzungen hinreichend schnell konvergieren.
+ML-Verfahren (Random Forest, Boosting, neuronale Netze). Damit das gutgeht,
+braucht es zwei Sicherungen: **Cross-Fitting** und **Neyman-Orthogonalität**.
 """
 )
+
+with vertiefung("Die zwei Sicherungen: Cross-Fitting und Orthogonalität"):
+    st.markdown(
+        r"""
+    **Cross-Fitting.** Die Vorhersage für jede Beobachtung stammt von einem
+    Modell, das diese Beobachtung nie im Training gesehen hat. Andernfalls
+    überträgt sich Overfitting auf die Residuen: Der Wald sagt die
+    Trainingsdaten zu gut vorher, $\tilde{Y}$ und $\tilde{D}$ werden zu klein,
+    und der Effekt verzerrt sich systematisch. Praktisch teilt man die
+    Stichprobe in $K$ Folds, trainiert auf $K-1$ und sagt den ausgelassenen
+    vorher.
+
+    **Neyman-Orthogonalität.** Die Momentenbedingung
+
+    $$
+    E\big[(\tilde{Y} - \tau\,\tilde{D})\,\tilde{D}\big] = 0
+    $$
+
+    ist so konstruiert, dass ihre Ableitung nach den Nuisance-Funktionen im
+    wahren Parameter verschwindet. Schätzfehler in $\hat{g}$ und $\hat{m}$
+    wirken sich deshalb nur in **zweiter Ordnung** auf $\hat{\tau}$ aus. ML
+    darf also unpräzise sein, solange beide Nuisance-Schätzungen hinreichend
+    schnell konvergieren. Die übliche Bedingung ist eine Rate von
+    $o(n^{-1/4})$ für jede der beiden.
+    """
+    )
 
 # ------------------------------------------------ Demo: DML vs. naiv
 st.markdown("## Demo: Drei Schätzer im Vergleich")
@@ -203,25 +220,32 @@ merkkasten(
     "der DAG, nicht der Algorithmus.",
     typ="merke",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Warum kann man nicht einfach einen Random Forest auf (D, X) → Y "
-    "trainieren und daraus den kausalen Effekt von D ablesen?",
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "Random Forests funktionieren nicht mit binären Variablen",
-        "Der Forest optimiert Prediction: Er hat keinen Koeffizienten für D, und Regularisierung darf D-Information durch korrelierte X ersetzen, was den Effekt verzerrt",
-        "Man kann, das ist genau DML",
-        "Weil Random Forests keine Wahrscheinlichkeiten ausgeben",
+        (
+            "Für <i>wen</i> wirkt eine Maßnahme? Der ATE ist ein Durchschnitt "
+            "und kann gegensätzliche Einzeleffekte verdecken. Causal Forests "
+            "und der DR-Learner schätzen heterogene Effekte. Wie verhindert "
+            "man dabei, dass man nur Rauschen findet?"
+        ),
+        (
+            "Wie gut müssen die ML-Nuisance-Modelle sein? Die Theorie verlangt "
+            "eine Konvergenzrate, die man an echten Daten nie nachprüfen kann. "
+            "Welche praktischen Diagnosen gibt es ersatzweise?"
+        ),
+        (
+            "DML adjustiert nur für <i>beobachtete</i> Confounder. Wie stark "
+            "müsste ein unbeobachteter Confounder sein, um euer Ergebnis zu "
+            "kippen? Genau das beantwortet eine Sensitivitätsanalyse."
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Für gute Vorhersagen ist es egal, ob Information aus D oder aus mit D "
-        "korrelierten X-Variablen kommt. Für Kausalschlüsse ist genau das "
-        "fatal. DML trennt deshalb sauber: erst X herausrechnen (aus D und Y), "
-        "dann den Effekt aus den Residuen holen."
+    hinweis=(
+        "Startpunkt: <code>DoubleML</code> (mitentwickelt am Lehrstuhl für "
+        "Statistik der Universität Hamburg) und <code>econml</code> für "
+        "CATE-Schätzung. Dazu Chernozhukov et al., <i>Applied Causal "
+        "Inference Powered by ML and AI</i> (frei online)."
     ),
-    key="quiz_kausal_dml",
 )
 
 # -------------------------------------------------------------- Ausblick

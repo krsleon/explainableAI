@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from sklearn.linear_model import LassoCV, LinearRegression, Ridge, RidgeCV, lasso_path
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten
 
 kapitel_kopf(
     "🎚️",
@@ -285,25 +285,33 @@ merkkasten(
     "Kausales Machine Learning.",
     typ="achtung",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Warum setzt das Lasso Koeffizienten exakt auf null, Ridge aber nicht?",
+gruppen_aufgabe(
+    "Worauf eure Gruppe hier aufbaut",
     [
-        "Weil das Lasso die Variablen vor dem Fitten nach Wichtigkeit sortiert",
-        "Weil die Betragsstrafe bei null einen Knick hat: kleine Beiträge lohnen den Sprung über den Knick nicht, beim glatten Quadrat bringt die letzte Annäherung an null dagegen fast keine Strafersparnis",
-        "Weil Ridge nur bei Klassifikationsproblemen funktioniert",
-        "Weil das Lasso einen größeren λ-Wert benutzt als Ridge",
+        (
+            "Lasso wählt Variablen aus. Darf man die ausgewählten Variablen "
+            "anschließend kausal interpretieren? Die Antwort lautet nein, und "
+            "der Grund dafür heißt Post-Selection Inference."
+        ),
+        (
+            "Wie wählt ihr den Strafparameter, und wie stabil ist die Auswahl? "
+            "Zieht mehrere Bootstrap-Stichproben und schaut, ob immer "
+            "dieselben Variablen überleben."
+        ),
+        (
+            "Ridge entspricht einem Gaussian Prior, Lasso einem Laplace-Prior "
+            "auf den Koeffizienten. Rechnet diese Verbindung für euer Beispiel "
+            "nach, sie schlägt die Brücke zum Kapitel Bayesian Methods."
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Die ℓ₁-Strafe ist bei null nicht differenzierbar. Ein Regressor "
-        "muss einen spürbaren Beitrag zur Fehlerreduktion leisten, sonst "
-        "bleibt sein Koeffizient exakt bei null. Die glatte ℓ₂-Strafe von "
-        "Ridge schrumpft dagegen nur, ohne je ganz auf null zu setzen."
+    hinweis=(
+        "Startpunkt: <code>scikit-learn</code> (LassoCV, RidgeCV) und "
+        "<code>DoubleML</code> für gültige Inferenz nach der "
+        "Variablenauswahl. Zum Nachlesen Belloni, Chernozhukov und Hansen "
+        "(2014)."
     ),
-    key="quiz_ml_regularisierung",
 )
+
 
 # -------------------------------------------------------------- Ausblick
 st.markdown("## Weiterführende Literatur")

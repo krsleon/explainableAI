@@ -10,7 +10,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten, vertiefung
 
 kapitel_kopf(
     "⚖️",
@@ -263,78 +263,78 @@ else:
     )
 
 # --------------------------------------- Demo 3: Non-Compliance
-st.markdown("## Demo: Non-Compliance mit ITT, Per-Protocol und IV")
-st.markdown(
-    r"""
-In klinischen Studien lässt sich die *Zuweisung* $Z$ randomisieren, nicht
-aber die tatsächliche *Einnahme* $D$: Ein Teil der Zugewiesenen nimmt das
-Medikament nicht (**Non-Compliance**). Angenommen, vor allem die weniger
-schwer Erkrankten halten die Therapie durch. Für die Auswertung stehen drei
-Ansätze zur Wahl:
+with vertiefung("Wenn nicht alle mitmachen: ITT, Per-Protocol und IV"):
+    st.markdown(
+        r"""
+    In klinischen Studien lässt sich die *Zuweisung* $Z$ randomisieren, nicht
+    aber die tatsächliche *Einnahme* $D$: Ein Teil der Zugewiesenen nimmt das
+    Medikament nicht (**Non-Compliance**). Angenommen, vor allem die weniger
+    schwer Erkrankten halten die Therapie durch. Für die Auswertung stehen drei
+    Ansätze zur Wahl:
 
-- **Intention-to-Treat (ITT):** Vergleich nach *Zuweisung* $Z$. Die
-  Randomisierung bleibt intakt, geschätzt wird jedoch der Effekt des
-  Angebots, bei Non-Compliance eine verwässerte Größe.
-- **Per-Protocol:** Vergleich nach tatsächlicher *Einnahme* $D$. Da die
-  Einnahme selbstselektiert ist, kehrt der Selection Bias zurück.
-- **Instrumental Variables (IV):** Die randomisierte Zuweisung $Z$ dient als
-  **Instrument** für die Einnahme $D$. Der **Wald Estimator**
+    - **Intention-to-Treat (ITT):** Vergleich nach *Zuweisung* $Z$. Die
+      Randomisierung bleibt intakt, geschätzt wird jedoch der Effekt des
+      Angebots, bei Non-Compliance eine verwässerte Größe.
+    - **Per-Protocol:** Vergleich nach tatsächlicher *Einnahme* $D$. Da die
+      Einnahme selbstselektiert ist, kehrt der Selection Bias zurück.
+    - **Instrumental Variables (IV):** Die randomisierte Zuweisung $Z$ dient als
+      **Instrument** für die Einnahme $D$. Der **Wald Estimator**
 
-$$
-\widehat{\mathrm{LATE}}
-= \frac{E[Y \mid Z{=}1] - E[Y \mid Z{=}0]}{E[D \mid Z{=}1] - E[D \mid Z{=}0]}
-= \frac{\mathrm{ITT}}{\text{Complier-Anteil}}
-$$
+    $$
+    \widehat{\mathrm{LATE}}
+    = \frac{E[Y \mid Z{=}1] - E[Y \mid Z{=}0]}{E[D \mid Z{=}1] - E[D \mid Z{=}0]}
+    = \frac{\mathrm{ITT}}{\text{Complier-Anteil}}
+    $$
 
-identifiziert den **Local Average Treatment Effect (LATE)** für die
-**Complier**. Er ist gültig unter der *Exclusion Restriction*, nach der die
-Zuweisung ausschließlich über die Einnahme wirkt, und unter *Monotonicity*,
-nach der niemand systematisch das Gegenteil der Zuweisung tut.
-"""
-)
+    identifiziert den **Local Average Treatment Effect (LATE)** für die
+    **Complier**. Er ist gültig unter der *Exclusion Restriction*, nach der die
+    Zuweisung ausschließlich über die Einnahme wirkt, und unter *Monotonicity*,
+    nach der niemand systematisch das Gegenteil der Zuweisung tut.
+    """
+    )
 
-anteil_complier = st.slider("Anteil Complier (halten sich an die Zuweisung)", 0.2, 1.0, 0.6, step=0.05)
-
-
-@st.cache_data
-def compliance_studie(anteil: float, n: int = 20000, seed: int = 8):
-    rng = np.random.default_rng(seed)
-    schwere = rng.uniform(0, 1, n)
-    z = rng.integers(0, 2, n)
-    complier = schwere < anteil          # die weniger Kranken halten durch
-    d = z * complier.astype(int)         # einseitige Non-Compliance
-    y = 85 - 30 * schwere + WAHRER_EFFEKT * d + rng.normal(0, 5, n)
-    itt = y[z == 1].mean() - y[z == 0].mean()
-    per_protocol = y[d == 1].mean() - y[d == 0].mean()
-    iv = itt / complier.mean()
-    return itt, per_protocol, iv
+    anteil_complier = st.slider("Anteil Complier (halten sich an die Zuweisung)", 0.2, 1.0, 0.6, step=0.05)
 
 
-itt, per_protocol, iv = compliance_studie(anteil_complier)
+    @st.cache_data
+    def compliance_studie(anteil: float, n: int = 20000, seed: int = 8):
+        rng = np.random.default_rng(seed)
+        schwere = rng.uniform(0, 1, n)
+        z = rng.integers(0, 2, n)
+        complier = schwere < anteil          # die weniger Kranken halten durch
+        d = z * complier.astype(int)         # einseitige Non-Compliance
+        y = 85 - 30 * schwere + WAHRER_EFFEKT * d + rng.normal(0, 5, n)
+        itt = y[z == 1].mean() - y[z == 0].mean()
+        per_protocol = y[d == 1].mean() - y[d == 0].mean()
+        iv = itt / complier.mean()
+        return itt, per_protocol, iv
 
-fig_nc = go.Figure()
-fig_nc.add_bar(
-    x=["ITT (nach Zuweisung)", "Per-Protocol (nach Einnahme)", "IV / LATE"],
-    y=[itt, per_protocol, iv],
-    marker_color=[FARBEN["gletscher"], FARBEN["beere"], FARBEN["wiese"]],
-)
-fig_nc.add_hline(
-    y=WAHRER_EFFEKT, line_dash="dash", line_color=FARBEN["schiefer"],
-    annotation_text="wahrer Effekt der Einnahme (+8)",
-)
-fig_nc.update_layout(yaxis_title="geschätzter Effekt (Punkte)", height=380)
-st.plotly_chart(fig_nc, use_container_width=True)
 
-st.markdown(
-    f"""
-Bei **{anteil_complier:.0%} Compliern** ergibt sich: ITT ≈ {itt:.1f}
-(verwässert, denn geschätzt wird der Effekt des Angebots, was allerdings
-häufig genau die politikrelevante Größe ist), Per-Protocol ≈
-{per_protocol:.1f} (verzerrt, weil die Einnehmenden systematisch gesünder
-sind) und IV ≈ {iv:.1f} (trifft den wahren Einnahme-Effekt, gültig für die
-Complier).
-"""
-)
+    itt, per_protocol, iv = compliance_studie(anteil_complier)
+
+    fig_nc = go.Figure()
+    fig_nc.add_bar(
+        x=["ITT (nach Zuweisung)", "Per-Protocol (nach Einnahme)", "IV / LATE"],
+        y=[itt, per_protocol, iv],
+        marker_color=[FARBEN["gletscher"], FARBEN["beere"], FARBEN["wiese"]],
+    )
+    fig_nc.add_hline(
+        y=WAHRER_EFFEKT, line_dash="dash", line_color=FARBEN["schiefer"],
+        annotation_text="wahrer Effekt der Einnahme (+8)",
+    )
+    fig_nc.update_layout(yaxis_title="geschätzter Effekt (Punkte)", height=380)
+    st.plotly_chart(fig_nc, use_container_width=True)
+
+    st.markdown(
+        f"""
+    Bei **{anteil_complier:.0%} Compliern** ergibt sich: ITT ≈ {itt:.1f}
+    (verwässert, denn geschätzt wird der Effekt des Angebots, was allerdings
+    häufig genau die politikrelevante Größe ist), Per-Protocol ≈
+    {per_protocol:.1f} (verzerrt, weil die Einnehmenden systematisch gesünder
+    sind) und IV ≈ {iv:.1f} (trifft den wahren Einnahme-Effekt, gültig für die
+    Complier).
+    """
+    )
 
 merkkasten(
     "Merke",
@@ -345,24 +345,34 @@ merkkasten(
     "IV-Methoden den Einnahme-Effekt für die Complier zurückgewinnen.",
     typ="merke",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Warum beseitigt eine größere Stichprobe den Selection Bias nicht?",
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "Doch, ab n = 10 000 verschwindet jeder Bias",
-        "Weil der Bias systematisch ist: Die Gruppen unterscheiden sich strukturell, egal wie präzise man misst",
-        "Weil große Stichproben neue Confounder erzeugen",
-        "Weil der Standardfehler mit n wächst",
+        (
+            "Wie plant man ein Experiment, <i>bevor</i> Daten existieren? "
+            "Fallzahlberechnung, Präregistrierung, Block- oder "
+            "Stratifizierungs-Randomisierung. Hier entscheidet sich, ob eine "
+            "Studie überhaupt etwas zeigen kann."
+        ),
+        (
+            "Was tun, wenn nicht alle mitmachen? Die Vertiefung oben stellt "
+            "ITT, Per-Protocol und IV nebeneinander. Welche der drei Größen "
+            "beantwortet welche Frage, und welche würdet ihr einer "
+            "Zulassungsbehörde vorlegen?"
+        ),
+        (
+            "Wie geht man mit mehreren Endpunkten um? Wer zwanzig Outcomes "
+            "testet, findet fast garantiert eines mit p &lt; 0,05. Bonferroni, "
+            "Holm, False Discovery Rate: Was davon ist in klinischen Studien "
+            "Standard?"
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Mehr Daten verkleinern die zufällige Streuung, nicht die "
-        "systematische Verzerrung, man schätzt den falschen Wert nur immer "
-        "genauer. Allein das Design, also Randomisierung, Adjustierung oder "
-        "ein Quasi-Experiment, beseitigt Bias."
+    hinweis=(
+        "Startpunkt: das CONSORT-Statement als Checkliste für "
+        "RCT-Berichte, <code>statsmodels.stats.power</code> für "
+        "Fallzahlen, und ein echtes Studienprotokoll von "
+        "ClinicalTrials.gov zum Auseinandernehmen."
     ),
-    key="quiz_kausal_po",
 )
 
 # -------------------------------------------------------------- Ausblick

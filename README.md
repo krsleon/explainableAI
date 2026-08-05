@@ -49,7 +49,13 @@ automatisch in der Navigation.
 Zusätzlich eine `app.py` in den Ordner legen; sie wird statt des Markdowns als
 Seite angezeigt. Regeln: kein `st.set_page_config()`, nur Pakete aus
 `requirements.txt`, Dateien relativ zum eigenen Ordner laden
-(`Path(__file__).parent / "daten.csv"`). Vorlage: `content/projekte/beispielprojekt/`.
+(`Path(__file__).parent / "daten.csv"`).
+
+Zwei Vorlagen stehen bereit: `content/projekte/_vorlage/app.py` als minimales
+Widget-Skelett und `content/projekte/beispielprojekt/` als ausgearbeitete
+Studie an echten Experimentaldaten (Project STAR). Deren Tab-Struktur (Frage,
+Daten, naive Analyse, Identifikation, Ergebnis, Limitationen) ist das
+empfohlene Gerüst für eine Projektarbeit.
 
 Fehler in einem Projektordner stoppen nie die ganze App; betroffene Seiten
 zeigen eine Fehlermeldung.
@@ -57,7 +63,8 @@ zeigen eine Fehlermeldung.
 ## Neues Kapitel hinzufügen
 
 1. Datei unter `views/ml/` bzw. `views/kausalitaet/` anlegen (Stubs zeigen das
-   Grundgerüst; `utils.theming` liefert `kapitel_kopf`, `merkkasten`, `quiz`).
+   Grundgerüst; `utils.theming` liefert `kapitel_kopf`, `merkkasten`,
+   `vertiefung` und `gruppen_aufgabe`).
 2. In `streamlit_app.py` als `st.Page` in der passenden Sektion registrieren.
 3. Seite in `tests/test_smoke.py` zur Liste `STATISCHE_SEITEN` hinzufügen.
 

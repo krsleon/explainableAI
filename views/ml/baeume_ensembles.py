@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from utils.ml_demos import entscheidungsgrenze, monde_daten
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten
 
 kapitel_kopf(
     "🌲",
@@ -405,25 +405,32 @@ merkkasten(
     "ML und in der gesamten Kausalitäts-Sektion zentral sein.",
     typ="achtung",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Warum overfittet ein Random Forest weniger als ein einzelner tiefer "
-    "Decision Tree?",
+gruppen_aufgabe(
+    "Worauf eure Gruppe hier aufbaut",
     [
-        "Weil jeder Tree im Forest flacher ist als ein Einzelbaum",
-        "Weil die Mittelung vieler unterschiedlich irrender Trees die Varianz senkt",
-        "Weil der Forest weniger Features benutzt",
-        "Er overfittet nicht weniger, er ist nur schneller",
+        (
+            "Feature Importance ist keine Kausalität. Konstruiert euch ein "
+            "Beispiel, in dem ein Merkmal hohe Importance bekommt, obwohl es "
+            "nichts verursacht, etwa weil es mit der wahren Ursache korreliert."
+        ),
+        (
+            "Ein Random Forest lässt sich zu einem <b>Causal Forest</b> "
+            "umbauen. Was genau muss man dafür ändern? Stichworte sind Honest "
+            "Splitting und ein anderes Splitting-Kriterium."
+        ),
+        (
+            "Boosting hat viele Hyperparameter. Wie tuned man sie, ohne sich "
+            "das Testset zu verbrennen, und wie viel Genauigkeit kostet ein "
+            "ehrliches Vorgehen tatsächlich?"
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Die Trees sind einzeln tief und instabil, haben also hohe Varianz. "
-        "Ihre Fehler sind jedoch teilweise unkorreliert und mitteln sich bei "
-        "der Aggregation heraus."
+    hinweis=(
+        "Startpunkt: <code>scikit-learn</code>, dazu <code>xgboost</code> "
+        "oder <code>lightgbm</code>. Für den Schritt zu Causal Forests "
+        "<code>econml</code> und Athey &amp; Imbens (2016)."
     ),
-    key="quiz_ml_baeume",
 )
+
 
 # -------------------------------------------------------------- Ausblick
 st.markdown("## Weiterführende Literatur")

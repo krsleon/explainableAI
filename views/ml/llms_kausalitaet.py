@@ -10,7 +10,7 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten, vertiefung
 
 kapitel_kopf(
     "💬",
@@ -214,46 +214,54 @@ merkkasten(
 )
 
 # ------------------------------------- LLMs als Werkzeug der Kausalanalyse
-st.markdown("## LLMs als Werkzeug der Kausalanalyse")
-st.markdown(
+with vertiefung("LLMs als Werkzeug der Kausalanalyse"):
+    st.markdown(
+        """
+    Die ergiebigere Frage ist oft nicht, ob das LLM kausal denken kann, sondern
+    wofür es sich innerhalb einer Kausalanalyse einsetzen lässt. Drei
+    Richtungen, die sich alle für Gruppenprojekte eignen:
+
+    - **Causal Reasoning benchmarken:** Dem LLM systematisch Interventions- und
+      Counterfactual-Fragen stellen, auch mit erfundenen Variablen, damit es
+      nicht aus dem Gedächtnis antworten kann, und die Fehlerquote messen.
+    - **Causal Discovery unterstützen:** Klassische Discovery-Algorithmen sehen
+      nur Zahlen. LLMs kennen die Bedeutung von Variablennamen wie „Rauchen“
+      oder „Lungenkrebs“ und können Kanten samt Richtung vorschlagen, die als
+      Vorwissen in DAGs einfließen.
+    - **Confounder aus Text gewinnen:** In unstrukturierten Daten wie
+      Arztbriefen, Bewertungen oder Social-Media-Posts stecken Störfaktoren, die
+      in keiner Tabellenspalte stehen. LLMs können sie extrahieren und messbar
+      machen, sodass sich für sie adjustieren lässt.
     """
-Die ergiebigere Frage ist oft nicht, ob das LLM kausal denken kann, sondern
-wofür es sich innerhalb einer Kausalanalyse einsetzen lässt. Drei
-Richtungen, die sich alle für Gruppenprojekte eignen:
-
-- **Causal Reasoning benchmarken:** Dem LLM systematisch Interventions- und
-  Counterfactual-Fragen stellen, auch mit erfundenen Variablen, damit es
-  nicht aus dem Gedächtnis antworten kann, und die Fehlerquote messen.
-- **Causal Discovery unterstützen:** Klassische Discovery-Algorithmen sehen
-  nur Zahlen. LLMs kennen die Bedeutung von Variablennamen wie „Rauchen“
-  oder „Lungenkrebs“ und können Kanten samt Richtung vorschlagen, die als
-  Vorwissen in DAGs einfließen.
-- **Confounder aus Text gewinnen:** In unstrukturierten Daten wie
-  Arztbriefen, Bewertungen oder Social-Media-Posts stecken Störfaktoren, die
-  in keiner Tabellenspalte stehen. LLMs können sie extrahieren und messbar
-  machen, sodass sich für sie adjustieren lässt.
-"""
-)
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Unser Bigram-Modell vervollständigt „der hahn kräht und die sonne …“ "
-    "korrekt mit „geht auf“. Warum reicht das nicht, um die Frage „Was "
-    "passiert mit dem Sonnenaufgang, wenn wir den Hahn stumm schalten?“ zu "
-    "beantworten?",
+    )
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "Das Modell hat zu wenige Sätze gesehen, mit mehr Daten ginge es",
-        "Die Frage ist eine Intervention (Stufe 2), das Modell kennt nur Wortfolge-Statistik (Stufe 1)",
-        "Das Modell kann keine Verneinungen verarbeiten",
-        "Die Temperature ist falsch eingestellt",
+        (
+            "Kann ein LLM einen brauchbaren DAG vorschlagen? Das lässt sich "
+            "messen: Gebt dem Modell Variablen aus einem Fachgebiet, "
+            "vergleicht den vorgeschlagenen Graphen mit dem Expertenkonsens, "
+            "und prüft, ob es die Richtung der Pfeile trifft."
+        ),
+        (
+            "Wie unterscheidet man Auswendiglernen von Schlussfolgern? Wenn "
+            "ein Modell ein Lehrbuchbeispiel richtig löst, kann es das "
+            "Beispiel schlicht gelesen haben. Was ändert sich, wenn ihr Namen, "
+            "Zahlen und Kontext austauscht?"
+        ),
+        (
+            "Text als Confounder: Arztbriefe, Produktbewertungen und "
+            "Gerichtsakten enthalten Störfaktoren, die in keiner "
+            "Tabellenspalte stehen. Wie bringt man sie mit Embeddings in eine "
+            "Kausalanalyse, und wann geht das schief?"
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Wortfolge-Statistik ist Association. Für Interventionsfragen braucht "
-        "es ein Kausalmodell der Welt, mehr Textdaten derselben Art ändern die "
-        "Stufe nicht."
+    hinweis=(
+        "Startpunkt: die Benchmarks <code>Corr2Cause</code> und "
+        "<code>CLADDER</code> für Causal Reasoning, dazu ein LLM eurer "
+        "Wahl über API. Rechnet mit überraschend schwachen Ergebnissen, "
+        "das ist ein Befund und kein Fehler."
     ),
-    key="quiz_ml_llm",
 )
 
 # -------------------------------------------------------------- Ausblick

@@ -108,4 +108,7 @@ def test_lade_projekte_findet_beispiel_und_ueberspringt_vorlage():
 
     beispiel = next(p for p in lade_projekte() if p.slug == "beispielprojekt")
     assert beispiel.app_datei is not None
-    assert beispiel.titel.startswith("Beispielprojekt")
+    # Der Titel stammt aus dem Frontmatter, nicht aus dem Ordnernamen. Der
+    # Fallback waere "Beispielprojekt" (slug, aufgehuebscht).
+    assert beispiel.titel and beispiel.titel != "Beispielprojekt"
+    assert beispiel.mitglieder

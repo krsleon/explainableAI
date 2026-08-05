@@ -16,7 +16,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten, vertiefung
 
 kapitel_kopf(
     "🔍",
@@ -206,116 +206,116 @@ if pdp_feature == "Alter":
     )
 
 # ----------------------------------------------- Demo 3: Mini-SHAP
-st.markdown("## Werkzeug 3: SHAP als faire Aufteilung einer Vorhersage")
-st.markdown(
-    r"""
-PDP und Importance erklären das Modell **im Durchschnitt**. Häufig ist aber
-eine Erklärung **für eine einzelne Entscheidung** gefragt: Warum erhält
-genau diese Person eine hohe Risikoprognose?
+with vertiefung("SHAP als faire Aufteilung einer Vorhersage"):
+    st.markdown(
+        r"""
+    PDP und Importance erklären das Modell **im Durchschnitt**. Häufig ist aber
+    eine Erklärung **für eine einzelne Entscheidung** gefragt: Warum erhält
+    genau diese Person eine hohe Risikoprognose?
 
-**SHAP** beantwortet diese Frage mit einem Konzept der kooperativen
-Spieltheorie. Die Features sind Mitspieler, die gemeinsam die Vorhersage
-erzeugen, und der **Shapley Value** verteilt die Abweichung vom Durchschnitt
-fair auf sie. Für Feature $j$ ist er der gewichtete mittlere
-Marginalbeitrag über alle Koalitionen $S$ der Feature-Menge $F$:
+    **SHAP** beantwortet diese Frage mit einem Konzept der kooperativen
+    Spieltheorie. Die Features sind Mitspieler, die gemeinsam die Vorhersage
+    erzeugen, und der **Shapley Value** verteilt die Abweichung vom Durchschnitt
+    fair auf sie. Für Feature $j$ ist er der gewichtete mittlere
+    Marginalbeitrag über alle Koalitionen $S$ der Feature-Menge $F$:
 
-$$
-\phi_j = \sum_{S \subseteq F \setminus \{j\}}
-\frac{|S|!\,\big(|F| - |S| - 1\big)!}{|F|!}
-\Big(v\big(S \cup \{j\}\big) - v(S)\Big),
-$$
+    $$
+    \phi_j = \sum_{S \subseteq F \setminus \{j\}}
+    \frac{|S|!\,\big(|F| - |S| - 1\big)!}{|F|!}
+    \Big(v\big(S \cup \{j\}\big) - v(S)\Big),
+    $$
 
-wobei $v(S)$ die erwartete Modellvorhersage bezeichnet, wenn nur die
-Features in $S$ auf die Werte der erklärten Instanz gesetzt werden. Zentral
-ist die **Effizienz-Eigenschaft**
-$\sum_j \phi_j = \hat{f}(x) - E\big[\hat{f}(X)\big]$: Die Beiträge summieren
-sich exakt zur Abweichung vom Durchschnitt. Bei drei Features lässt sich die
-Summe über alle $2^3$ Koalitionen exakt auswerten, und genau das tut diese
-Demo. Bei vielen Features greift die SHAP-Bibliothek auf effiziente
-Näherungen zurück.
+    wobei $v(S)$ die erwartete Modellvorhersage bezeichnet, wenn nur die
+    Features in $S$ auf die Werte der erklärten Instanz gesetzt werden. Zentral
+    ist die **Effizienz-Eigenschaft**
+    $\sum_j \phi_j = \hat{f}(x) - E\big[\hat{f}(X)\big]$: Die Beiträge summieren
+    sich exakt zur Abweichung vom Durchschnitt. Bei drei Features lässt sich die
+    Summe über alle $2^3$ Koalitionen exakt auswerten, und genau das tut diese
+    Demo. Bei vielen Features greift die SHAP-Bibliothek auf effiziente
+    Näherungen zurück.
 
-Stelle eine Person ein:
-"""
-)
-
-regler_e, regler_s, regler_a = st.columns(3)
-p_einkommen = regler_e.slider("Einkommen (Tsd. €)", 1.5, 8.0, 2.5, step=0.1)
-p_schulden = regler_s.slider("Schuldenquote", 0.0, 0.8, 0.6, step=0.05)
-p_alter = regler_a.slider("Alter", 18, 75, 27)
-
-
-@st.cache_data
-def shapley_exakt(einkommen: float, schulden: float, alter: float):
-    """Exakte Shapley Values über alle 2^3 Koalitionen.
-
-    Wert einer Koalition S: mittlere Vorhersage, wenn die Features in S auf
-    die Instanzwerte gesetzt und die übrigen über Hintergrunddaten
-    marginalisiert werden.
+    Stelle eine Person ein:
     """
-    instanz = {FEATURES[0]: einkommen, FEATURES[1]: schulden, FEATURES[2]: alter}
-    hintergrund = X_train.sample(250, random_state=0).reset_index(drop=True)
-
-    def koalitionswert(koalition: tuple) -> float:
-        variante = hintergrund.copy()
-        for f in koalition:
-            variante[f] = instanz[f]
-        return float(wald.predict_proba(variante)[:, 1].mean())
-
-    werte = {
-        koalition: koalitionswert(koalition)
-        for groesse in range(4)
-        for koalition in combinations(FEATURES, groesse)
-    }
-    k = len(FEATURES)
-
-    def kanonisch(koalition) -> tuple:
-        # Schlüssel in FEATURES-Reihenfolge, passend zu combinations() oben
-        return tuple(sorted(koalition, key=FEATURES.index))
-
-    beitraege = {}
-    for f in FEATURES:
-        summe = 0.0
-        for groesse in range(k):
-            for koalition in combinations([g for g in FEATURES if g != f], groesse):
-                gewicht = factorial(len(koalition)) * factorial(
-                    k - len(koalition) - 1
-                ) / factorial(k)
-                summe += gewicht * (
-                    werte[kanonisch((*koalition, f))] - werte[koalition]
-                )
-        beitraege[f] = summe
-    return werte[()], beitraege
-
-
-basis, beitraege = shapley_exakt(p_einkommen, p_schulden, p_alter)
-gesamt = basis + sum(beitraege.values())
-
-fig_shap = go.Figure(
-    go.Waterfall(
-        orientation="v",
-        measure=["absolute", "relative", "relative", "relative", "total"],
-        x=["Durchschnitt", *FEATURES, "Vorhersage für diese Person"],
-        y=[basis, *[beitraege[f] for f in FEATURES], None],
-        text=[f"{basis:.2f}", *[f"{beitraege[f]:+.2f}" for f in FEATURES], f"{gesamt:.2f}"],
-        textposition="outside",
-        increasing=dict(marker=dict(color=FARBEN["beere"])),
-        decreasing=dict(marker=dict(color=FARBEN["wiese"])),
-        totals=dict(marker=dict(color=FARBEN["nacht"])),
-        connector=dict(line=dict(color=FARBEN["schiefer"], width=1)),
     )
-)
-fig_shap.update_layout(
-    yaxis_title="Ausfallwahrscheinlichkeit", height=420, showlegend=False,
-)
-st.plotly_chart(fig_shap, use_container_width=True)
 
-staerkstes = max(beitraege, key=lambda f: abs(beitraege[f]))
-st.markdown(
-    f"Vom Durchschnittsrisiko **{basis:.0%}** zur persönlichen Prognose "
-    f"**{gesamt:.0%}**: Der größte Beitrag stammt für diese Person von "
-    f"**{staerkstes}** ({beitraege[staerkstes]:+.2f}). Rote Beiträge erhöhen "
-    "das prognostizierte Risiko, grüne senken es."
-)
+    regler_e, regler_s, regler_a = st.columns(3)
+    p_einkommen = regler_e.slider("Einkommen (Tsd. €)", 1.5, 8.0, 2.5, step=0.1)
+    p_schulden = regler_s.slider("Schuldenquote", 0.0, 0.8, 0.6, step=0.05)
+    p_alter = regler_a.slider("Alter", 18, 75, 27)
+
+
+    @st.cache_data
+    def shapley_exakt(einkommen: float, schulden: float, alter: float):
+        """Exakte Shapley Values über alle 2^3 Koalitionen.
+
+        Wert einer Koalition S: mittlere Vorhersage, wenn die Features in S auf
+        die Instanzwerte gesetzt und die übrigen über Hintergrunddaten
+        marginalisiert werden.
+        """
+        instanz = {FEATURES[0]: einkommen, FEATURES[1]: schulden, FEATURES[2]: alter}
+        hintergrund = X_train.sample(250, random_state=0).reset_index(drop=True)
+
+        def koalitionswert(koalition: tuple) -> float:
+            variante = hintergrund.copy()
+            for f in koalition:
+                variante[f] = instanz[f]
+            return float(wald.predict_proba(variante)[:, 1].mean())
+
+        werte = {
+            koalition: koalitionswert(koalition)
+            for groesse in range(4)
+            for koalition in combinations(FEATURES, groesse)
+        }
+        k = len(FEATURES)
+
+        def kanonisch(koalition) -> tuple:
+            # Schlüssel in FEATURES-Reihenfolge, passend zu combinations() oben
+            return tuple(sorted(koalition, key=FEATURES.index))
+
+        beitraege = {}
+        for f in FEATURES:
+            summe = 0.0
+            for groesse in range(k):
+                for koalition in combinations([g for g in FEATURES if g != f], groesse):
+                    gewicht = factorial(len(koalition)) * factorial(
+                        k - len(koalition) - 1
+                    ) / factorial(k)
+                    summe += gewicht * (
+                        werte[kanonisch((*koalition, f))] - werte[koalition]
+                    )
+            beitraege[f] = summe
+        return werte[()], beitraege
+
+
+    basis, beitraege = shapley_exakt(p_einkommen, p_schulden, p_alter)
+    gesamt = basis + sum(beitraege.values())
+
+    fig_shap = go.Figure(
+        go.Waterfall(
+            orientation="v",
+            measure=["absolute", "relative", "relative", "relative", "total"],
+            x=["Durchschnitt", *FEATURES, "Vorhersage für diese Person"],
+            y=[basis, *[beitraege[f] for f in FEATURES], None],
+            text=[f"{basis:.2f}", *[f"{beitraege[f]:+.2f}" for f in FEATURES], f"{gesamt:.2f}"],
+            textposition="outside",
+            increasing=dict(marker=dict(color=FARBEN["beere"])),
+            decreasing=dict(marker=dict(color=FARBEN["wiese"])),
+            totals=dict(marker=dict(color=FARBEN["nacht"])),
+            connector=dict(line=dict(color=FARBEN["schiefer"], width=1)),
+        )
+    )
+    fig_shap.update_layout(
+        yaxis_title="Ausfallwahrscheinlichkeit", height=420, showlegend=False,
+    )
+    st.plotly_chart(fig_shap, use_container_width=True)
+
+    staerkstes = max(beitraege, key=lambda f: abs(beitraege[f]))
+    st.markdown(
+        f"Vom Durchschnittsrisiko **{basis:.0%}** zur persönlichen Prognose "
+        f"**{gesamt:.0%}**: Der größte Beitrag stammt für diese Person von "
+        f"**{staerkstes}** ({beitraege[staerkstes]:+.2f}). Rote Beiträge erhöhen "
+        "das prognostizierte Risiko, grüne senken es."
+    )
 
 merkkasten(
     "Achtung: Erklärung des Modells ist nicht Erklärung der Welt",
@@ -337,24 +337,32 @@ Praxis verwendet ihr die Bibliotheken `shap` und `lime`; nach diesem Kapitel
 wisst ihr, was sie unter der Haube tun.
 """
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Ein Feature hat für eine Person einen Shapley Value von +0,15. Was "
-    "bedeutet das?",
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "Das Feature erhöht das wahre Risiko dieser Person um 15 Prozentpunkte",
-        "Das Feature hebt die Modellvorhersage dieser Person um 0,15 über den Durchschnitt, als fair aufgeteilter Beitrag",
-        "Das Modell ist bei diesem Feature zu 15 % unsicher",
-        "Das Feature ist das wichtigste im gesamten Datensatz",
+        (
+            "SHAP-Werte sind <b>keine</b> kausalen Effekte. Wo genau bricht "
+            "die Interpretation, wenn Merkmale untereinander korreliert sind, "
+            "und warum verteilt SHAP dann Wichtigkeit auf Variablen, die "
+            "nichts bewirken?"
+        ),
+        (
+            "Wie stabil sind Erklärungen? Trainiert zwei Modelle mit ähnlicher "
+            "Genauigkeit auf denselben Daten und vergleicht ihre Erklärungen. "
+            "Wenn sie auseinanderlaufen: welcher sollte man glauben?"
+        ),
+        (
+            "SHAP, LIME und kontrafaktische Erklärungen beantworten "
+            "unterschiedliche Fragen. Welche Methode passt zu welcher "
+            "Situation? Und was will eine Person eigentlich wissen, deren "
+            "Kreditantrag abgelehnt wurde?"
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "SHAP verteilt die Differenz zwischen persönlicher Vorhersage und "
-        "Durchschnittsvorhersage fair auf die Features. Es ist eine Aussage "
-        "über das Modell, nicht über den wahren kausalen Effekt."
+    hinweis=(
+        "Startpunkt: <code>shap</code> und <code>dice-ml</code> für "
+        "kontrafaktische Erklärungen. Als Nachschlagewerk C. Molnar, "
+        "<i>Interpretable Machine Learning</i> (frei online)."
     ),
-    key="quiz_ml_xai",
 )
 
 # -------------------------------------------------------------- Ausblick

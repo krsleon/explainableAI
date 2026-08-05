@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten
 
 kapitel_kopf(
     "🤖",
@@ -287,25 +287,35 @@ merkkasten(
     "Dieses Spannungsverhältnis heißt <b>Bias-Variance-Tradeoff</b>.",
     typ="merke",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Ein Modell erreicht fast null Fehler auf den Trainingsdaten, aber einen "
-    "sehr hohen Fehler auf den Testdaten. Was liegt vor?",
+gruppen_aufgabe(
+    "Worauf eure Gruppe hier aufbaut",
     [
-        "Underfitting, denn das Modell ist zu simpel",
-        "Overfitting, denn das Modell hat das Rauschen auswendig gelernt",
-        "Ein perfektes Modell, denn Trainingsfehler null ist das Ziel",
-        "Ein Datenfehler, denn bei sauberen Daten kann das nicht passieren",
+        (
+            "Der Bias-Variance-Tradeoff taucht in jedem Verfahren dieser "
+            "Website wieder auf, von der RDD-Bandbreite über die Stärke des "
+            "Priors bis zur Tiefe eines Trees. Sucht ihn in eurem Gruppenthema "
+            "und benennt konkret, was dort Bias und was Varianz ist."
+        ),
+        (
+            "Wir wählen hier über einen einzigen Testfehler aus. Wie macht man "
+            "das seriös? Kreuzvalidierung, Nested Cross-Validation, und die "
+            "Frage, warum wiederholtes Nachschauen auf demselben Testset die "
+            "Fehlerschätzung ruiniert."
+        ),
+        (
+            "Vorhersage und Kausalität sind zwei verschiedene Ziele. Legt für "
+            "euer Thema fest, welches der beiden ihr verfolgt, denn davon "
+            "hängt ab, ob ein besseres Modell auch eine bessere Antwort "
+            "liefert."
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Ein Trainingsfehler nahe null bei gleichzeitig hohem Testfehler ist "
-        "das charakteristische Muster von Overfitting: Das Modell "
-        "generalisiert nicht, es erinnert sich lediglich."
+    hinweis=(
+        "Startpunkt: <code>scikit-learn</code> (Model Selection) und ISLR "
+        "Kap. 5. Die Antwort auf die dritte Frage gehört in Abschnitt 1 "
+        "eurer Projektarbeit."
     ),
-    key="quiz_ml_grundlagen",
 )
+
 
 # -------------------------------------------------------------- Ausblick
 st.markdown("## Weiterführende Literatur")

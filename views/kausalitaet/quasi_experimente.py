@@ -8,7 +8,7 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten, vertiefung
 
 kapitel_kopf(
     "📐",
@@ -159,119 +159,119 @@ Perioden und Gruppen (Zweiwege-Fixed-Effects) sowie korrekte Standardfehler.
 )
 
 # ---------------------------------------------- Demo 2: RDD
-st.markdown("## Demo: Regression Discontinuity Design (RDD)")
-st.markdown(
-    r"""
-Das zweite Design nutzt Zuteilungsregeln mit **hartem Schwellenwert**.
-Beispiel: Ein Stipendium wird ab 60 Punkten im Auswahltest vergeben. Die
-Punktzahl ist die **Running Variable** $X_i$, der Schwellenwert der
-**Cutoff** $c_0$. Im *sharp design* ist das Treatment deterministisch:
+with vertiefung("Regression Discontinuity Design (RDD)"):
+    st.markdown(
+        r"""
+    Das zweite Design nutzt Zuteilungsregeln mit **hartem Schwellenwert**.
+    Beispiel: Ein Stipendium wird ab 60 Punkten im Auswahltest vergeben. Die
+    Punktzahl ist die **Running Variable** $X_i$, der Schwellenwert der
+    **Cutoff** $c_0$. Im *sharp design* ist das Treatment deterministisch:
 
-$$
-D_i = \mathbb{1}\{X_i \geq c_0\}.
-$$
+    $$
+    D_i = \mathbb{1}\{X_i \geq c_0\}.
+    $$
 
-Personen knapp unter und knapp über $c_0$ sind in allen relevanten Merkmalen
-praktisch identisch, lokal wirkt die Zuteilung also wie randomisiert. Der
-RDD-Estimand ist der Effekt am Cutoff:
+    Personen knapp unter und knapp über $c_0$ sind in allen relevanten Merkmalen
+    praktisch identisch, lokal wirkt die Zuteilung also wie randomisiert. Der
+    RDD-Estimand ist der Effekt am Cutoff:
 
-$$
-\tau_{c_0} = E\big[Y^1 - Y^0 \mid X = c_0\big]
-= \lim_{x \,\downarrow\, c_0} E[Y \mid X = x]
-- \lim_{x \,\uparrow\, c_0} E[Y \mid X = x].
-$$
+    $$
+    \tau_{c_0} = E\big[Y^1 - Y^0 \mid X = c_0\big]
+    = \lim_{x \,\downarrow\, c_0} E[Y \mid X = x]
+    - \lim_{x \,\uparrow\, c_0} E[Y \mid X = x].
+    $$
 
-Geschätzt wird der Sprung zweier lokaler Regressionen. Die zentrale
-Identifikationsannahme ist die **Stetigkeit** der erwarteten potenziellen
-Outcomes am Cutoff: Ohne Treatment gäbe es dort keinen Sprung. Insbesondere
-darf niemand seine Position relativ zu $c_0$ präzise manipulieren können.
-"""
-)
-
-regler_rdd_tau, regler_h, regler_kruemmung = st.columns(3)
-rdd_effekt = regler_rdd_tau.slider("Wahrer Stipendieneffekt (Tsd. € Einkommen)", 0.0, 15.0, 6.0, step=0.5)
-bandbreite = regler_h.slider("Bandbreite um den Cutoff (± Punkte)", 5, 40, 15)
-kruemmung = regler_kruemmung.slider("Nichtlinearität des Hintergrundtrends", 0.0, 1.0, 0.5, step=0.1)
-
-CUTOFF = 60
-
-
-@st.cache_data
-def rdd_daten(tau: float, kruemmung: float, n: int = 700, seed: int = 12):
-    rng = np.random.default_rng(seed)
-    punkte = rng.uniform(20, 100, n)
-    stipendium = (punkte >= CUTOFF).astype(float)
-    einkommen = (
-        35
-        + 0.25 * (punkte - CUTOFF)
-        + kruemmung * 12 * ((punkte - CUTOFF) / 40) ** 2
-        + tau * stipendium
-        + rng.normal(0, 3, n)
+    Geschätzt wird der Sprung zweier lokaler Regressionen. Die zentrale
+    Identifikationsannahme ist die **Stetigkeit** der erwarteten potenziellen
+    Outcomes am Cutoff: Ohne Treatment gäbe es dort keinen Sprung. Insbesondere
+    darf niemand seine Position relativ zu $c_0$ präzise manipulieren können.
+    """
     )
-    return punkte, einkommen
+
+    regler_rdd_tau, regler_h, regler_kruemmung = st.columns(3)
+    rdd_effekt = regler_rdd_tau.slider("Wahrer Stipendieneffekt (Tsd. € Einkommen)", 0.0, 15.0, 6.0, step=0.5)
+    bandbreite = regler_h.slider("Bandbreite um den Cutoff (± Punkte)", 5, 40, 15)
+    kruemmung = regler_kruemmung.slider("Nichtlinearität des Hintergrundtrends", 0.0, 1.0, 0.5, step=0.1)
+
+    CUTOFF = 60
 
 
-punkte, einkommen = rdd_daten(rdd_effekt, kruemmung)
+    @st.cache_data
+    def rdd_daten(tau: float, kruemmung: float, n: int = 700, seed: int = 12):
+        rng = np.random.default_rng(seed)
+        punkte = rng.uniform(20, 100, n)
+        stipendium = (punkte >= CUTOFF).astype(float)
+        einkommen = (
+            35
+            + 0.25 * (punkte - CUTOFF)
+            + kruemmung * 12 * ((punkte - CUTOFF) / 40) ** 2
+            + tau * stipendium
+            + rng.normal(0, 3, n)
+        )
+        return punkte, einkommen
 
-links = (punkte >= CUTOFF - bandbreite) & (punkte < CUTOFF)
-rechts = (punkte >= CUTOFF) & (punkte <= CUTOFF + bandbreite)
 
-fit_links = np.polyfit(punkte[links], einkommen[links], 1)
-fit_rechts = np.polyfit(punkte[rechts], einkommen[rechts], 1)
-rdd_schaetzer = np.polyval(fit_rechts, CUTOFF) - np.polyval(fit_links, CUTOFF)
+    punkte, einkommen = rdd_daten(rdd_effekt, kruemmung)
 
-fig_rdd = go.Figure()
-fig_rdd.add_vrect(
-    x0=CUTOFF - bandbreite, x1=CUTOFF + bandbreite,
-    fillcolor=FARBEN["nebel"], opacity=0.6, line_width=0,
-)
-fig_rdd.add_scatter(
-    x=punkte[punkte < CUTOFF], y=einkommen[punkte < CUTOFF], mode="markers",
-    name="kein Stipendium", marker=dict(color=FARBEN["gletscher"], size=5, opacity=0.45),
-)
-fig_rdd.add_scatter(
-    x=punkte[punkte >= CUTOFF], y=einkommen[punkte >= CUTOFF], mode="markers",
-    name="Stipendium", marker=dict(color=FARBEN["sonne"], size=5, opacity=0.45),
-)
-raster_links = np.linspace(CUTOFF - bandbreite, CUTOFF, 20)
-raster_rechts = np.linspace(CUTOFF, CUTOFF + bandbreite, 20)
-fig_rdd.add_scatter(
-    x=raster_links, y=np.polyval(fit_links, raster_links), mode="lines",
-    name="lokaler Fit links", line=dict(color=FARBEN["nacht"], width=4),
-)
-fig_rdd.add_scatter(
-    x=raster_rechts, y=np.polyval(fit_rechts, raster_rechts), mode="lines",
-    name="lokaler Fit rechts", line=dict(color=FARBEN["beere"], width=4),
-)
-fig_rdd.add_vline(x=CUTOFF, line_dash="dot", line_color=FARBEN["schiefer"])
-fig_rdd.update_layout(
-    xaxis_title="Punkte im Auswahltest (Cutoff = 60)",
-    yaxis_title="Späteres Einkommen (Tsd. €)", height=440,
-)
-st.plotly_chart(fig_rdd, use_container_width=True)
+    links = (punkte >= CUTOFF - bandbreite) & (punkte < CUTOFF)
+    rechts = (punkte >= CUTOFF) & (punkte <= CUTOFF + bandbreite)
 
-metrik_wahr_rdd, metrik_rdd = st.columns(2)
-metrik_wahr_rdd.metric("Wahrer Effekt", f"{rdd_effekt:+.1f}")
-metrik_rdd.metric(
-    "RDD-Schätzung (Sprung am Cutoff)", f"{rdd_schaetzer:+.1f}",
-    delta=f"{rdd_schaetzer - rdd_effekt:+.1f}", delta_color="inverse",
-)
+    fit_links = np.polyfit(punkte[links], einkommen[links], 1)
+    fit_rechts = np.polyfit(punkte[rechts], einkommen[rechts], 1)
+    rdd_schaetzer = np.polyval(fit_rechts, CUTOFF) - np.polyval(fit_links, CUTOFF)
 
-st.markdown(
-    r"""
-Variiere die **Bandwidth** $h$: Eine kleine Bandwidth nutzt wenige
-Beobachtungen (hohe Varianz), eine große verletzt die lokale lineare
-Approximation des gekrümmten Hintergrundtrends (Bias). Dieser
-Bias-Variance-Tradeoff, strukturell derselbe wie bei der Wahl der
-Modellkomplexität im ML-Kapitel, ist die zentrale praktische Entscheidung
-jeder RDD-Analyse, moderne Verfahren wählen $h$ datengetrieben.
+    fig_rdd = go.Figure()
+    fig_rdd.add_vrect(
+        x0=CUTOFF - bandbreite, x1=CUTOFF + bandbreite,
+        fillcolor=FARBEN["nebel"], opacity=0.6, line_width=0,
+    )
+    fig_rdd.add_scatter(
+        x=punkte[punkte < CUTOFF], y=einkommen[punkte < CUTOFF], mode="markers",
+        name="kein Stipendium", marker=dict(color=FARBEN["gletscher"], size=5, opacity=0.45),
+    )
+    fig_rdd.add_scatter(
+        x=punkte[punkte >= CUTOFF], y=einkommen[punkte >= CUTOFF], mode="markers",
+        name="Stipendium", marker=dict(color=FARBEN["sonne"], size=5, opacity=0.45),
+    )
+    raster_links = np.linspace(CUTOFF - bandbreite, CUTOFF, 20)
+    raster_rechts = np.linspace(CUTOFF, CUTOFF + bandbreite, 20)
+    fig_rdd.add_scatter(
+        x=raster_links, y=np.polyval(fit_links, raster_links), mode="lines",
+        name="lokaler Fit links", line=dict(color=FARBEN["nacht"], width=4),
+    )
+    fig_rdd.add_scatter(
+        x=raster_rechts, y=np.polyval(fit_rechts, raster_rechts), mode="lines",
+        name="lokaler Fit rechts", line=dict(color=FARBEN["beere"], width=4),
+    )
+    fig_rdd.add_vline(x=CUTOFF, line_dash="dot", line_color=FARBEN["schiefer"])
+    fig_rdd.update_layout(
+        xaxis_title="Punkte im Auswahltest (Cutoff = 60)",
+        yaxis_title="Späteres Einkommen (Tsd. €)", height=440,
+    )
+    st.plotly_chart(fig_rdd, use_container_width=True)
 
-Ergänzend zum *Sharp Design*: Springt am Cutoff lediglich die
-Treatment-**Wahrscheinlichkeit** (*Fuzzy Design*), wird der Sprung als
-Instrument verwendet. Identifiziert wird dann, analog zum
-Non-Compliance-Fall im RCT-Kapitel, ein LATE für die Complier am Cutoff.
-"""
-)
+    metrik_wahr_rdd, metrik_rdd = st.columns(2)
+    metrik_wahr_rdd.metric("Wahrer Effekt", f"{rdd_effekt:+.1f}")
+    metrik_rdd.metric(
+        "RDD-Schätzung (Sprung am Cutoff)", f"{rdd_schaetzer:+.1f}",
+        delta=f"{rdd_schaetzer - rdd_effekt:+.1f}", delta_color="inverse",
+    )
+
+    st.markdown(
+        r"""
+    Variiere die **Bandwidth** $h$: Eine kleine Bandwidth nutzt wenige
+    Beobachtungen (hohe Varianz), eine große verletzt die lokale lineare
+    Approximation des gekrümmten Hintergrundtrends (Bias). Dieser
+    Bias-Variance-Tradeoff, strukturell derselbe wie bei der Wahl der
+    Modellkomplexität im ML-Kapitel, ist die zentrale praktische Entscheidung
+    jeder RDD-Analyse, moderne Verfahren wählen $h$ datengetrieben.
+
+    Ergänzend zum *Sharp Design*: Springt am Cutoff lediglich die
+    Treatment-**Wahrscheinlichkeit** (*Fuzzy Design*), wird der Sprung als
+    Instrument verwendet. Identifiziert wird dann, analog zum
+    Non-Compliance-Fall im RCT-Kapitel, ein LATE für die Complier am Cutoff.
+    """
+    )
 
 merkkasten(
     "Die Identifikationsannahmen",
@@ -284,24 +284,36 @@ merkkasten(
     "glaubwürdig sind.",
     typ="definition",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Warum liefert der Vergleich von Personen knapp über und knapp unter dem "
-    "RDD-Cutoff einen kausalen Effekt?",
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "Weil der Cutoff von Expert:innen festgelegt wurde",
-        "Weil Personen direkt am Cutoff praktisch identisch sind, ob sie darüber oder darunter landen, ist nahezu Zufall",
-        "Weil die Stichprobe am Cutoff am größten ist",
-        "Weil lineare Regression Verzerrungen automatisch entfernt",
+        (
+            "Was passiert, wenn Regionen zu <b>unterschiedlichen "
+            "Zeitpunkten</b> behandelt werden? Der klassische "
+            "Zweiwege-Fixed-Effects-Schätzer wird dann verzerrt, weil er "
+            "bereits behandelte Einheiten als Kontrollgruppe missbraucht. Was "
+            "schlagen Goodman-Bacon (2021) und Callaway &amp; Sant’Anna (2021) "
+            "stattdessen vor?"
+        ),
+        (
+            "Wie prüft man Pre-Trends, ohne sich selbst zu betrügen? Ein "
+            "Event-Study-Plot mit weiten Konfidenzintervallen zeigt keine "
+            "Verletzung, aber er belegt auch keine Parallelität. Wie "
+            "unterscheidet man beides?"
+        ),
+        (
+            "Wie wählt man die RDD-Bandbreite datengetrieben, statt sie wie in "
+            "der Vertiefung per Schieberegler zu raten? Und wie testet man, ob "
+            "Menschen ihre Position am Cutoff manipuliert haben?"
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Direkt am Schwellenwert wirkt die Zuteilung wie ein lokales "
-        "Zufallsexperiment. Der Preis dafür: Der Effekt gilt zunächst nur "
-        "lokal, also für Personen in der Nähe des Cutoffs."
+    hinweis=(
+        "Startpunkt: <code>differences</code> und "
+        "<code>linearmodels</code> (Python) für staggered DiD, "
+        "<code>rdrobust</code> für Bandbreitenwahl und McCrary-Dichtetest. "
+        "Ein echter Politikwechsel mit Paneldaten ist lehrreicher als jede "
+        "Simulation."
     ),
-    key="quiz_kausal_quasi",
 )
 
 # -------------------------------------------------------------- Ausblick

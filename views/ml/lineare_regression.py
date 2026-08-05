@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from sklearn.linear_model import LinearRegression
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten
 
 kapitel_kopf(
     "📈",
@@ -365,26 +365,32 @@ st.page_link(
     label="Vorgriff: Kausales Machine Learning (DML)",
     icon="🎯",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Eine Regression von Stundenlohn auf einen Frau-Indikator und Kontrollen "
-    "liefert den Koeffizienten −2. Was bedeutet das?",
+gruppen_aufgabe(
+    "Worauf eure Gruppe hier aufbaut",
     [
-        "Frauen verdienen insgesamt im Schnitt 2 € weniger pro Stunde",
-        "Bei gleichen erfassten Kontrollmerkmalen sagt das Modell für Frauen 2 € weniger vorher",
-        "Das Frausein verursacht kausal 2 € Lohnverlust",
-        "Der Koeffizient ist nicht interpretierbar, weil Löhne nicht linear sind",
+        (
+            "Partialling-Out nach Frisch-Waugh-Lovell ist der Kern von Double "
+            "Machine Learning. Rechnet den Gender Wage Gap einmal klassisch "
+            "und einmal mit einem ML-Modell für die Störfunktion und "
+            "vergleicht die beiden Schätzungen."
+        ),
+        (
+            "Standardfehler entscheiden über eure Aussage. Wann sind die "
+            "klassischen Formeln falsch, und wie stark ändern robuste oder auf "
+            "Gruppenebene geclusterte Standardfehler euer Konfidenzintervall?"
+        ),
+        (
+            "Was passiert mit OLS, wenn es mehr Spalten als Zeilen gibt? Genau "
+            "an dieser Stelle setzt das nächste Kapitel mit Lasso und Ridge an."
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Der Koeffizient vergleicht Vorhersagen bei festgehaltenen Kontrollen "
-        "(Partialling-Out). Der Gesamtunterschied (Option 1) ist der naive "
-        "Vergleich, und eine kausale Deutung (Option 3) braucht zusätzliche "
-        "Annahmen, etwa dass keine relevanten Störfaktoren fehlen."
+    hinweis=(
+        "Startpunkt: <code>statsmodels</code> für Inferenz und robuste "
+        "Standardfehler, <code>linearmodels</code> für Paneldaten und "
+        "Clustering."
     ),
-    key="quiz_ml_linreg",
 )
+
 
 # -------------------------------------------------------------- Ausblick
 st.markdown("## Weiterführende Literatur")

@@ -8,7 +8,7 @@ Vorgeschmack auf Causal Discovery.
 import numpy as np
 import streamlit as st
 
-from utils.theming import kapitel_kopf, merkkasten, quiz
+from utils.theming import gruppen_aufgabe, kapitel_kopf, merkkasten
 
 kapitel_kopf(
     "🕸️",
@@ -232,26 +232,33 @@ k1.metric("Korr(X, Y)", f"{korr_xy:.2f}")
 k2.metric("Korr(X, Z)", f"{korr_xz:.2f}")
 k3.metric("Korr(Z, Y)", f"{korr_zy:.2f}")
 k4.metric("Korr(X, Y | Z)", f"{partiell_xy:.2f}", help="Korrelation von X und Y, nachdem Z herausgerechnet wurde")
-
-quiz(
-    "X und Y sind korreliert, aber gegeben Z verschwindet die Korrelation "
-    "fast vollständig. Welche Strukturen sind mit diesem Muster vereinbar?",
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "Nur die Chain X → Z → Y",
-        "Nur die Fork X ← Z → Y",
-        "Chain und Fork, die Daten können sie nicht unterscheiden",
-        "Der Collider X → Z ← Y",
+        (
+            "Dieses Kapitel setzt den DAG als gegeben voraus. <b>Causal "
+            "Discovery</b> dreht die Frage um: Lässt sich die Struktur aus den "
+            "Daten selbst lernen? Algorithmen wie PC, GES und NOTEARS "
+            "versuchen genau das."
+        ),
+        (
+            "Warum legen Daten allein den DAG nie vollständig fest: Mehrere "
+            "Graphen erzeugen exakt dieselben bedingten Unabhängigkeiten "
+            "(Markov-Äquivalenzklasse). Was bleibt dann übrig, und welche "
+            "Zusatzannahmen lösen die Mehrdeutigkeit auf?"
+        ),
+        (
+            "Was passiert, wenn ein wichtiger Confounder gar nicht erhoben "
+            "wurde? Der FCI-Algorithmus ist dafür gebaut, versteckte Variablen "
+            "zuzulassen. Wie viel Aussage bleibt dann noch übrig?"
+        ),
     ],
-    richtig=2,
-    erklaerung=(
-        "Chain und Fork erzeugen exakt dasselbe Unabhängigkeitsmuster, sie "
-        "sind Markov-äquivalent. Der Collider fiele dagegen auf: Bei ihm "
-        "wären X und Y unabhängig, würden aber gegeben Z korreliert. "
-        "Discovery-Algorithmen identifizieren daher oft nur eine "
-        "Äquivalenzklasse. Für mehr braucht es Zusatzannahmen, Experimente "
-        "oder Vorwissen, etwa aus LLMs (siehe ML-Sektion)."
+    hinweis=(
+        "Startpunkt: <code>causal-learn</code> (Implementierungen von PC, "
+        "GES und FCI) und <code>dowhy</code>. Testet die Verfahren zuerst "
+        "an simulierten Daten, deren wahren DAG ihr kennt, sonst könnt ihr "
+        "die Ergebnisse nicht bewerten."
     ),
-    key="quiz_kausal_dags",
 )
 
 # -------------------------------------------------------------- Ausblick

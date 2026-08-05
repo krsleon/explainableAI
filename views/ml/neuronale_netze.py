@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 
 from utils.ml_demos import entscheidungsgrenze, monde_daten
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten
 
 kapitel_kopf(
     "🧠",
@@ -279,25 +279,34 @@ merkkasten(
     "namensgebende <b>Black Box</b> des Explainable-ML-Themas.",
     typ="merke",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Was passiert, wenn man in einem tiefen Netz alle Activation Functions "
-    "durch die Identität ersetzt, also auf Aktivierung verzichtet?",
+gruppen_aufgabe(
+    "Worauf eure Gruppe hier aufbaut",
     [
-        "Nichts, die Tiefe liefert weiterhin Flexibilität",
-        "Das Netz kollabiert mathematisch zu einem einzigen linearen Modell",
-        "Das Netz kann dann nur noch Klassifikation, keine Regression",
-        "Das Training wird unmöglich",
+        (
+            "Netze approximieren beliebige Funktionen. Was heißt das für ihre "
+            "Rolle als Nuisance-Schätzer in Double Machine Learning, und woran "
+            "scheitert die Sache trotzdem, wenn die Konvergenzrate nicht "
+            "stimmt?"
+        ),
+        (
+            "Wie erklärt man die Vorhersage eines Netzes? SHAP funktioniert "
+            "technisch, aber die Erklärungen schwanken je nach "
+            "Initialisierung. Prüft das nach, indem ihr dasselbe Netz mehrfach "
+            "trainiert."
+        ),
+        (
+            "Von hier zum Sprachmodell: Was kommt zwischen einem "
+            "Feedforward-Netz und einem Transformer noch dazu? Das Kapitel "
+            "LLMs und kausales Denken baut direkt darauf auf."
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Verkettete lineare Funktionen sind wieder linear, unabhängig von der "
-        "Anzahl der Layer. Erst die Nichtlinearität der Aktivierung verleiht "
-        "der Tiefe echte Ausdruckskraft."
+    hinweis=(
+        "Startpunkt: <code>pytorch</code> für eigene Architekturen, "
+        "Goodfellow, Bengio und Courville, <i>Deep Learning</i> (frei "
+        "online)."
     ),
-    key="quiz_ml_netze",
 )
+
 
 # -------------------------------------------------------------- Ausblick
 st.markdown("## Weiterführende Literatur")

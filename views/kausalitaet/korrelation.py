@@ -8,7 +8,7 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten
 
 kapitel_kopf(
     "🔀",
@@ -280,25 +280,35 @@ merkkasten(
     "Dafür braucht es Annahmen über die Kausalstruktur.",
     typ="merke",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Eine Studie findet: Wer viel Rotwein trinkt, ist gesünder. Was ist die "
-    "vorsichtigste Interpretation?",
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "Rotwein macht gesund, der Zusammenhang ist schließlich statistisch signifikant",
-        "Gesundheit führt zu Rotweinkonsum",
-        "Ein Confounder wie Einkommen oder Lebensstil könnte beide Größen treiben",
-        "Der Zusammenhang muss ein Messfehler sein",
+        (
+            "Das Thema <b>Examples und Case Studies</b> beginnt hier: Sucht "
+            "euch ein bekanntes Paper mit offenem Replikationspaket und "
+            "rechnet es nach. Kommen dieselben Zahlen heraus? Falls nicht, "
+            "liegt es an den Daten, am Code oder an der Beschreibung im Text?"
+        ),
+        (
+            "Welche einzelne Annahme trägt das Ergebnis? Variiert sie und "
+            "schaut, ab wann der Befund kippt. Ein Ergebnis, das erst bei "
+            "grober Verletzung verschwindet, ist etwas ganz anderes als eines, "
+            "das schon bei kleinen Änderungen umfällt."
+        ),
+        (
+            "Confounder und Simpson-Paradox sind hier simuliert. Findet ein "
+            "reales Beispiel, in dem aggregierter und gruppenweiser "
+            "Zusammenhang gegenläufig sind, und begründet, welche der beiden "
+            "Ebenen die Frage beantwortet."
+        ),
     ],
-    richtig=2,
-    erklaerung=(
-        "Signifikanz schützt nicht vor Confounding. Ohne Experiment oder "
-        "Adjustierung bleibt offen, ob Rotwein, umgekehrte Kausalität oder "
-        "eine dritte Variable den Zusammenhang erzeugt."
+    hinweis=(
+        "Startpunkt: Harvard Dataverse und das AEA Data and Code "
+        "Repository für Replikationspakete. Das Beispielprojekt unter "
+        "Gruppenprojekte zeigt, wie die fertige Arbeit aufgebaut sein kann."
     ),
-    key="quiz_kausal_korrelation",
 )
+
 
 # -------------------------------------------------------------- Ausblick
 st.markdown("## Weiterführende Literatur")

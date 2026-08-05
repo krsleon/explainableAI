@@ -70,17 +70,48 @@ with st.expander("Weg 2 (Kür): eigene interaktive Streamlit-Seite"):
 Ihr wollt Slider, Live-Plots und eigene Widgets? Legt **zusätzlich** zur
 `projekt.md` eine `app.py` in euren Ordner, dann wird diese als Seite
 angezeigt (die `projekt.md` liefert weiterhin Titel & Infos für diese
-Galerie). Schaut euch das **Beispielprojekt** als Vorlage an.
+Galerie).
+
+Zwei Vorlagen stehen bereit:
+
+- `content/projekte/_vorlage/app.py`: minimales Skelett aus Schieberegler,
+  Berechnung und Plot. Gut zum Loslegen.
+- `content/projekte/beispielprojekt/`: eine vollständig ausgearbeitete
+  Studie an echten Experimentaldaten. Zeigt, wie eine Projektarbeit am Ende
+  aussehen kann.
 
 **Spielregeln für `app.py`:**
 
 - Kein `st.set_page_config()` aufrufen, das erledigt die Haupt-App bereits.
 - Nur Pakete aus `requirements.txt` verwenden (numpy, pandas, plotly,
-  scikit-learn). Braucht ihr mehr, sprecht uns an.
+  scikit-learn, scipy, statsmodels). Braucht ihr mehr, sprecht uns an.
 - Dateien (Daten, Bilder) relativ zu eurem Ordner laden, z. B. mit
   `Path(__file__).parent / "daten.csv"`.
+- Widget-`key`s mit eurem Projektnamen präfixen, damit sie sich nicht mit
+  anderen Seiten überschneiden.
 """
     )
+
+st.markdown("## Wie eine Projektarbeit aufgebaut sein sollte")
+st.markdown(
+    """
+Egal ob Markdown oder Streamlit, inhaltlich erwarten wir dieselben sechs
+Abschnitte. Das Beispielprojekt zeigt sie an echten Daten:
+
+| Abschnitt | Was hineingehört |
+|---|---|
+| **1 Frage** | Was wollt ihr wissen, warum ist es interessant, warum ist es schwer? |
+| **2 Daten & EDA** | Woher die Daten, was steckt drin, was fehlt? |
+| **3 Naive Analyse** | Der einfachste Vergleich, und wo er in die Irre führt |
+| **4 Identifikation** | Warum darf man das kausal lesen? Welche Annahmen? |
+| **5 Ergebnis** | Effekt mit Unsicherheit, Heterogenität, auch Nullbefunde |
+| **6 Limitationen** | Was eure Analyse *nicht* zeigt |
+
+Der wichtigste Abschnitt ist **4**. Eine Zahl ausrechnen kann jedes
+Statistikpaket. Zu begründen, warum diese Zahl einen kausalen Effekt misst,
+ist die eigentliche Arbeit.
+"""
+)
 
 merkkasten(
     "Keine Sorge vor Fehlern",

@@ -110,6 +110,42 @@ h3 {
 }
 .merkkasten.beispiel .mk-titel { color: #454B54; }
 
+/* --- Gruppen-Aufgabe ------------------------------------------------
+   Absetzung vom Merkkasten: kräftigerer Rahmen rundherum statt nur
+   links, damit "hier beginnt eure Arbeit" optisch heraussticht.      */
+.gruppen-aufgabe {
+    background: #FFF8F3;
+    border: 2px solid #E8804C;
+    border-radius: 0.6rem;
+    padding: 1.1rem 1.35rem;
+    margin: 1.5rem 0 1rem 0;
+    line-height: 1.55;
+}
+
+.gruppen-aufgabe .ga-titel {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.82rem;
+    color: #B05A2B;
+    margin-bottom: 0.5rem;
+}
+
+.gruppen-aufgabe ul {
+    margin: 0.25rem 0 0 0;
+    padding-left: 1.2rem;
+}
+
+.gruppen-aufgabe li {
+    margin-bottom: 0.35rem;
+}
+
+.gruppen-aufgabe .ga-hinweis {
+    margin-top: 0.75rem;
+    font-size: 0.92rem;
+    color: #5C6470;
+}
+
 /* --- Badges --------------------------------------------------------- */
 .badge-wip {
     display: inline-block;

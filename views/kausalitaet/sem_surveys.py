@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from scipy import stats
 
-from utils.theming import FARBEN, kapitel_kopf, merkkasten, quiz
+from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten, vertiefung
 
 kapitel_kopf(
     "📋",
@@ -157,73 +157,73 @@ Randomisierung liegt in deiner Hand.
 """
 )
 
-st.markdown("### Power-Analyse für das eigene Experiment")
-st.markdown(
-    r"""
-Die **Power** ist die Wahrscheinlichkeit, einen tatsächlich vorhandenen
-Effekt der standardisierten Größe $d$ (Cohens $d$) mit einem zweiseitigen
-Test zum Niveau $\alpha = 0{,}05$ zu entdecken. In Normal-Approximation gilt
-für zwei Gruppen der Größe $n$:
+with vertiefung("Power-Analyse für die eigene Stichprobengröße"):
+    st.markdown(
+        r"""
+    Die **Power** ist die Wahrscheinlichkeit, einen tatsächlich vorhandenen
+    Effekt der standardisierten Größe $d$ (Cohens $d$) mit einem zweiseitigen
+    Test zum Niveau $\alpha = 0{,}05$ zu entdecken. In Normal-Approximation gilt
+    für zwei Gruppen der Größe $n$:
 
-$$
-\mathrm{Power} \approx \Phi\!\Big(d\,\sqrt{\tfrac{n}{2}} \;-\; z_{1-\alpha/2}\Big),
-$$
+    $$
+    \mathrm{Power} \approx \Phi\!\Big(d\,\sqrt{\tfrac{n}{2}} \;-\; z_{1-\alpha/2}\Big),
+    $$
 
-wobei $\Phi$ die Verteilungsfunktion der Standardnormalverteilung bezeichnet.
-"""
-)
-
-regler_d, regler_n = st.columns(2)
-effekt_d = regler_d.slider(
-    "Erwartete Effektgröße (Cohens d)", 0.1, 1.0, 0.4, step=0.05,
-    help="0,2 = klein · 0,5 = mittel · 0,8 = groß",
-)
-n_gruppe = regler_n.slider("Teilnehmende pro Gruppe", 10, 500, 100, step=10)
-
-
-def power_zweistichproben(d: float, n: int, alpha: float = 0.05) -> float:
-    """Power eines zweiseitigen Zwei-Gruppen-Tests (Normal-Approximation)."""
-    z_krit = stats.norm.ppf(1 - alpha / 2)
-    verschiebung = d * np.sqrt(n / 2)
-    return float(1 - stats.norm.cdf(z_krit - verschiebung) + stats.norm.cdf(-z_krit - verschiebung))
-
-
-n_raster = np.arange(10, 501, 5)
-power_kurve = [power_zweistichproben(effekt_d, n) for n in n_raster]
-aktuelle_power = power_zweistichproben(effekt_d, n_gruppe)
-
-fig_power = go.Figure()
-fig_power.add_scatter(
-    x=n_raster, y=power_kurve, mode="lines", name="Power",
-    line=dict(color=FARBEN["nacht"], width=3),
-)
-fig_power.add_hline(
-    y=0.8, line_dash="dash", line_color=FARBEN["wiese"],
-    annotation_text="Konvention: 80 %",
-)
-fig_power.add_scatter(
-    x=[n_gruppe], y=[aktuelle_power], mode="markers", name="deine Studie",
-    marker=dict(color=FARBEN["sonne"], size=14, symbol="star"),
-)
-fig_power.update_layout(
-    xaxis_title="Teilnehmende pro Gruppe",
-    yaxis_title="Power (Chance, einen echten Effekt zu finden)",
-    yaxis=dict(range=[0, 1.02]), height=400,
-)
-st.plotly_chart(fig_power, use_container_width=True)
-
-st.metric("Power deiner Konfiguration", f"{aktuelle_power:.0%}")
-if aktuelle_power < 0.8:
-    st.warning(
-        "Power unter 80 %: Ein tatsächlich vorhandener Effekt dieser Größe "
-        "bliebe mit hoher Wahrscheinlichkeit unentdeckt. Plane mehr "
-        "Teilnehmende ein oder wähle eine stärkere Manipulation."
+    wobei $\Phi$ die Verteilungsfunktion der Standardnormalverteilung bezeichnet.
+    """
     )
-else:
-    st.success(
-        "Der Stichprobenplan ist ausreichend dimensioniert, um einen Effekt "
-        "dieser Größe mit der konventionellen Power von 80 % zu entdecken."
+
+    regler_d, regler_n = st.columns(2)
+    effekt_d = regler_d.slider(
+        "Erwartete Effektgröße (Cohens d)", 0.1, 1.0, 0.4, step=0.05,
+        help="0,2 = klein · 0,5 = mittel · 0,8 = groß",
     )
+    n_gruppe = regler_n.slider("Teilnehmende pro Gruppe", 10, 500, 100, step=10)
+
+
+    def power_zweistichproben(d: float, n: int, alpha: float = 0.05) -> float:
+        """Power eines zweiseitigen Zwei-Gruppen-Tests (Normal-Approximation)."""
+        z_krit = stats.norm.ppf(1 - alpha / 2)
+        verschiebung = d * np.sqrt(n / 2)
+        return float(1 - stats.norm.cdf(z_krit - verschiebung) + stats.norm.cdf(-z_krit - verschiebung))
+
+
+    n_raster = np.arange(10, 501, 5)
+    power_kurve = [power_zweistichproben(effekt_d, n) for n in n_raster]
+    aktuelle_power = power_zweistichproben(effekt_d, n_gruppe)
+
+    fig_power = go.Figure()
+    fig_power.add_scatter(
+        x=n_raster, y=power_kurve, mode="lines", name="Power",
+        line=dict(color=FARBEN["nacht"], width=3),
+    )
+    fig_power.add_hline(
+        y=0.8, line_dash="dash", line_color=FARBEN["wiese"],
+        annotation_text="Konvention: 80 %",
+    )
+    fig_power.add_scatter(
+        x=[n_gruppe], y=[aktuelle_power], mode="markers", name="deine Studie",
+        marker=dict(color=FARBEN["sonne"], size=14, symbol="star"),
+    )
+    fig_power.update_layout(
+        xaxis_title="Teilnehmende pro Gruppe",
+        yaxis_title="Power (Chance, einen echten Effekt zu finden)",
+        yaxis=dict(range=[0, 1.02]), height=400,
+    )
+    st.plotly_chart(fig_power, use_container_width=True)
+
+    st.metric("Power deiner Konfiguration", f"{aktuelle_power:.0%}")
+    if aktuelle_power < 0.8:
+        st.warning(
+            "Power unter 80 %: Ein tatsächlich vorhandener Effekt dieser Größe "
+            "bliebe mit hoher Wahrscheinlichkeit unentdeckt. Plane mehr "
+            "Teilnehmende ein oder wähle eine stärkere Manipulation."
+        )
+    else:
+        st.success(
+            "Der Stichprobenplan ist ausreichend dimensioniert, um einen Effekt "
+            "dieser Größe mit der konventionellen Power von 80 % zu entdecken."
+        )
 
 merkkasten(
     "Merke",
@@ -234,24 +234,32 @@ merkkasten(
     "Erhebung gerechnet, nicht danach.",
     typ="merke",
 )
-
-# ------------------------------------------------------------------ Quiz
-quiz(
-    "Im Mediationsmodell ist a = −0,5 (X → M) und b = 0,6 (M → Y), der "
-    "direkte Pfad c′ = 0,1. Wie groß ist der indirekte Effekt über M?",
+gruppen_aufgabe(
+    "Was eure Gruppe hier herausfindet",
     [
-        "0,1",
-        "−0,3 (nämlich a · b)",
-        "0,2 (nämlich a + b − c′)",
-        "Kann man aus a und b nicht berechnen",
+        (
+            "Wie misst man etwas, das man nicht direkt beobachten kann, also "
+            "Vertrauen, Motivation oder politische Einstellung? Latente "
+            "Konstrukte, Faktorenanalyse und Reliabilität sind das Handwerk "
+            "dahinter."
+        ),
+        (
+            "Wann ist ein SEM überhaupt schätzbar? Modelle mit zu vielen "
+            "freien Parametern sind nicht identifiziert, und die Software sagt "
+            "es einem nicht immer deutlich. Woran erkennt man es vorher?"
+        ),
+        (
+            "Baut ein eigenes Survey-Experiment: Vignetten oder "
+            "Conjoint-Design, Attention Checks, Randomisierung im Fragebogen. "
+            "Legt vorher fest, was ihr testen wollt."
+        ),
     ],
-    richtig=1,
-    erklaerung=(
-        "Der indirekte Effekt ist das Produkt der Pfade entlang des Weges: "
-        "a · b = −0,5 · 0,6 = −0,3. Zusammen mit c′ = 0,1 ergibt das einen "
-        "totalen Effekt von −0,2."
+    hinweis=(
+        "Startpunkt: <code>semopy</code> (Python) oder <code>lavaan</code> "
+        "(R), ein Fragebogen-Tool eurer Wahl, und die Power-Analyse aus "
+        "der Vertiefung oben, um die nötige Teilnehmerzahl vorab zu "
+        "bestimmen."
     ),
-    key="quiz_kausal_sem",
 )
 
 # -------------------------------------------------------------- Ausblick

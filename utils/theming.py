@@ -81,18 +81,34 @@ def merkkasten(titel: str, text: str, typ: str = "merke") -> None:
     )
 
 
-def quiz(frage: str, optionen: list[str], richtig: int, erklaerung: str, key: str) -> None:
-    """Kleines Verständnis-Quiz: Radio-Auswahl mit sofortigem Feedback."""
-    st.markdown(f"#### Verständnisfrage: {frage}")
-    antwort = st.radio(
-        frage, optionen, index=None, key=key, label_visibility="collapsed"
+def gruppen_aufgabe(titel: str, fragen: list[str], hinweis: str = "") -> None:
+    """Kasten mit offenen Fragen, die dieses Kapitel bewusst nicht beantwortet.
+
+    Markiert die Grenze zwischen „das erklären wir“ und „das erarbeitet eure
+    Gruppe“. `titel` und `hinweis` werden als HTML gerendert, ebenso die
+    Einträge in `fragen`. Für Hervorhebungen <b>…</b> / <i>…</i> verwenden.
+    """
+    punkte = "".join(f"<li>{frage}</li>" for frage in fragen)
+    hinweis_html = f'<div class="ga-hinweis">{hinweis}</div>' if hinweis else ""
+    st.markdown(
+        f'<div class="gruppen-aufgabe"><div class="ga-titel">{titel}</div>'
+        f"<ul>{punkte}</ul>{hinweis_html}</div>",
+        unsafe_allow_html=True,
     )
-    if antwort is None:
-        return
-    if optionen.index(antwort) == richtig:
-        st.success(f"**Richtig!** {erklaerung}")
-    else:
-        st.error("Nicht ganz. Überlege noch einmal und wähle neu.")
+
+
+def vertiefung(titel: str, offen: bool = False):
+    """Einheitlich beschrifteter Expander für vertiefende Abschnitte.
+
+    Als Context Manager verwenden::
+
+        with vertiefung("Wie SHAP-Werte entstehen"):
+            st.markdown(...)
+
+    Die Kapitel zeigen im Fließtext nur den Kern. Alles, was eine Gruppe
+    selbst erarbeiten soll, wandert hier hinein.
+    """
+    return st.expander(f"Vertiefung: {titel}", expanded=offen)
 
 
 def stub_seite(emoji: str, titel: str, punkte: list[str]) -> None:
