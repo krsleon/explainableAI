@@ -1,16 +1,30 @@
 """Kapitel ML: Lasso & Ridge.
 
 Hochdimensionale Regression: Warum OLS bei vielen Regressoren versagt,
-wie Ridge und Lasso mit Straftermen gegensteuern, Koeffizientenpfade und
-ein Vorhersagevergleich auf dünn besetzten (sparsen) Daten.
+wie Ridge und Lasso mit Straftermen gegensteuern, Koeffizientenpfade, ein
+Vorhersagevergleich auf dünn besetzten (sparsen) Daten und der
+Regularisierungs-Bias als Preis dafür.
 """
 
 import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
-from sklearn.linear_model import LassoCV, LinearRegression, Ridge, RidgeCV, lasso_path
+from sklearn.linear_model import (
+    Lasso,
+    LassoCV,
+    LinearRegression,
+    Ridge,
+    RidgeCV,
+    lasso_path,
+)
 
-from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten
+from utils.theming import (
+    FARBEN,
+    gruppen_aufgabe,
+    kapitel_kopf,
+    merkkasten,
+    vertiefung,
+)
 
 kapitel_kopf(
     "🎚️",
@@ -271,6 +285,189 @@ Test-MSE gegenüber der ungestraften Regression und liegt gleichauf mit
 deutlich aufwendigeren Verfahren wie Random Forests.
 """
 )
+
+# ------------------------------------------ Abschnitt: Regularisierungs-Bias
+st.markdown("## Der Preis: Regularisierungs-Bias")
+st.markdown(
+    r"""
+Regularisierung ist nicht umsonst. Der Strafterm zieht **jeden** Koeffizienten
+in Richtung null, auch den, der dich eigentlich interessiert. Der Schätzer
+landet deshalb im Mittel nicht auf dem wahren Wert, sondern systematisch zu
+nah bei null. Diese Verzerrung heißt **Regularisierungs-Bias**, und sie ist
+kein Unfall, sondern der Kaufpreis für die kleinere Varianz.
+
+Sie verschwindet auch dann nicht, wenn du $\lambda$ per Cross-Validation
+wählst. Im Gegenteil: CV sucht das $\lambda$ mit dem kleinsten
+Vorhersagefehler, und dieses $\lambda$ ist gerade so groß, dass es etwas Bias
+in Kauf nimmt, um viel Varianz zu sparen. Die Wahl ist optimal für die
+Prognose und schief für die Schätzung.
+
+Das lässt sich sichtbar machen. Wir halten das Design $X$ fest ($n = 100$,
+$p = 80$), ziehen 200-mal neues Rauschen und schauen jedes Mal nur auf einen
+einzigen Koeffizienten, den ersten, dessen wahrer Wert $\beta_1 = 1{,}5$
+beträgt.
+"""
+)
+
+
+@st.cache_data
+def bias_varianz(n: int = 100, p: int = 80, wiederholungen: int = 200, seed: int = 11):
+    """Sampling-Verteilung von beta_1 über Lambdas, bei festem Design X."""
+    rng = np.random.default_rng(seed)
+    beta = np.zeros(p)
+    beta[:3] = [1.5, 1.0, -0.8]
+    X = rng.standard_normal((n, p))
+    signal = X @ beta
+    lambdas = np.logspace(-2.5, -0.2, 12)
+
+    ols_schaetzer = np.empty(wiederholungen)
+    lasso_schaetzer = np.empty((len(lambdas), wiederholungen))
+    for r in range(wiederholungen):
+        y = signal + rng.normal(0, 1.0, n)
+        ols_schaetzer[r] = LinearRegression().fit(X, y).coef_[0]
+        for k, lam in enumerate(lambdas):
+            lasso_schaetzer[k, r] = Lasso(alpha=lam, max_iter=20000).fit(X, y).coef_[0]
+    return beta[0], lambdas, ols_schaetzer, lasso_schaetzer
+
+
+beta_wahr, lambdas, ols_schaetzer, lasso_schaetzer = bias_varianz()
+bias = lasso_schaetzer.mean(axis=1) - beta_wahr
+varianz = lasso_schaetzer.var(axis=1)
+mse_beta = bias**2 + varianz
+k_best = int(np.argmin(mse_beta))
+
+fig_verteilung = go.Figure()
+fig_verteilung.add_histogram(
+    x=ols_schaetzer,
+    name="OLS",
+    marker_color=FARBEN["beere"],
+    opacity=0.55,
+    nbinsx=35,
+)
+fig_verteilung.add_histogram(
+    x=lasso_schaetzer[k_best],
+    name=f"Lasso (λ = {lambdas[k_best]:.2f})",
+    marker_color=FARBEN["gletscher"],
+    opacity=0.55,
+    nbinsx=35,
+)
+fig_verteilung.add_vline(
+    x=beta_wahr,
+    line_dash="dash",
+    line_color=FARBEN["schiefer"],
+    annotation_text="wahrer Wert",
+)
+fig_verteilung.add_vline(
+    x=float(lasso_schaetzer[k_best].mean()),
+    line_dash="dot",
+    line_color=FARBEN["gletscher"],
+    annotation_text="Lasso im Mittel",
+    annotation_position="bottom left",
+)
+fig_verteilung.update_layout(
+    barmode="overlay",
+    title="Sampling-Verteilung des ersten Koeffizienten",
+    xaxis_title="Schätzung für β₁",
+    yaxis_title="Häufigkeit",
+    height=400,
+)
+
+fig_handel = go.Figure()
+for werte, name, farbe in (
+    (bias**2, "Bias²", FARBEN["sonne"]),
+    (varianz, "Varianz", FARBEN["gletscher"]),
+    (mse_beta, "MSE", FARBEN["beere"]),
+):
+    fig_handel.add_scatter(
+        x=lambdas, y=werte, mode="lines+markers", name=name,
+        line=dict(color=farbe, width=3),
+    )
+fig_handel.add_scatter(
+    x=[lambdas[k_best]],
+    y=[mse_beta[k_best]],
+    mode="markers",
+    name="bestes λ",
+    marker=dict(color=FARBEN["nacht"], size=14, symbol="circle-open",
+                line=dict(width=3)),
+)
+fig_handel.update_layout(
+    title="Bias-Varianz-Zerlegung für β₁",
+    xaxis_title="Strafhärte λ (log)",
+    xaxis_type="log",
+    yaxis_title="Beitrag zum MSE",
+    height=400,
+)
+
+spalte_verteilung, spalte_handel = st.columns(2)
+with spalte_verteilung:
+    st.plotly_chart(fig_verteilung, use_container_width=True)
+with spalte_handel:
+    st.plotly_chart(fig_handel, use_container_width=True)
+
+st.markdown(
+    r"""
+Links siehst du, wie sich die Schätzung über die 200 Stichproben verteilt.
+OLS streut breit, liegt im Mittel aber richtig. Das Lasso streut deutlich
+enger, sein Schwerpunkt liegt dafür sichtbar links vom wahren Wert. Dass eine
+einzelne Lasso-Schätzung trotzdem über $1{,}5$ liegen kann, ändert nichts am
+Befund: Der Fehler mittelt sich über Stichproben nicht weg, sondern bleibt.
+Genau dieser Versatz ist der Regularisierungs-Bias.
+
+Rechts steht der Handel im Detail. Mit wachsendem $\lambda$ fällt die Varianz
+schnell, das quadrierte Bias wächst langsam, und der MSE hat sein Minimum
+dazwischen. Das beste $\lambda$ ist also keines ohne Bias, sondern eines mit
+gerade so viel Bias, dass die Varianzersparnis ihn aufwiegt.
+
+Für die Vorhersage ist dieser Handel ein gutes Geschäft, für eine
+Effektschätzung nicht. Steckt in $X$ eine Behandlungsvariable $D$, deren
+Koeffizient dich als kausaler Effekt interessiert, dann schrumpft die Strafe
+genau diesen Koeffizienten mit, und dein geschätzter Effekt fällt zu klein
+aus. Dazu kommt der Selektionsschritt: Fliegt ein Confounder aus dem Modell,
+weil sein Koeffizient knapp unter der Schwelle liegt, bleibt die Verzerrung
+durch diesen Confounder unkorrigiert im Ergebnis stehen. Und die üblichen
+Standardfehler gelten ohnehin nicht mehr, denn sie tun so, als wären
+$\lambda$ und die Variablenauswahl vom Himmel gefallen statt aus denselben
+Daten.
+
+Der Ausweg besteht nicht darin, auf Regularisierung zu verzichten, ohne sie
+wärst du in hohen Dimensionen chancenlos. Man regularisiert weiter, sorgt
+aber dafür, dass der Bias den Zielparameter nicht mehr erreicht: Die
+störenden Zusammenhänge schätzt ML, der Zielparameter wird dagegen
+orthogonalisiert. Genau das leistet Double Machine Learning.
+"""
+)
+
+with vertiefung("Warum genau um λ verschoben wird"):
+    st.markdown(
+        r"""
+    Bei orthogonalem Design ($X'X/n = I$) lassen sich beide Schätzer in
+    geschlossener Form hinschreiben. Ridge skaliert den OLS-Schätzer einfach
+    herunter,
+
+    $$
+    \hat\beta_j^{\text{Ridge}} = \frac{\hat\beta_j^{\text{OLS}}}{1 + \lambda},
+    $$
+
+    das Lasso verschiebt ihn um einen festen Betrag Richtung null und schneidet
+    ab, was darunter liegt (**Soft Thresholding**):
+
+    $$
+    \hat\beta_j^{\text{Lasso}} = \operatorname{sign}\big(\hat\beta_j^{\text{OLS}}\big)
+    \cdot \max\Big(\big|\hat\beta_j^{\text{OLS}}\big| - \tfrac{\lambda}{2},\; 0\Big).
+    $$
+
+    Daran liest man beide Eigenschaften direkt ab: Ridge erreicht die Null nur
+    im Grenzwert, das Lasso erreicht sie exakt, sobald der OLS-Wert kleiner als
+    $\lambda/2$ ist.
+
+    Wichtiger für uns ist die zweite Beobachtung. Der Bias hängt an $\lambda$,
+    nicht an $n$. Er verschwindet nur, wenn $\lambda$ mit wachsender
+    Stichprobe schnell genug gegen null geht, und dann verliert die Strafe
+    ihre Schutzwirkung gegen Overfitting. Aus diesem Zielkonflikt kommst du
+    durch eine klügere Wahl von $\lambda$ nicht heraus, sondern nur durch ein
+    anderes Schätzverfahren.
+    """
+    )
 
 merkkasten(
     "Achtung: selektiert heißt nicht ursächlich",
