@@ -34,6 +34,10 @@ theming.inject_css()
 
 start = st.Page("views/start.py", title="Start", icon="🏔️", default=True)
 ueber = st.Page("views/ueber.py", title="Über uns", icon="ℹ️")
+streamlit_intro = st.Page(
+    "views/streamlit_intro.py", title="Was ist Streamlit?", icon="🎈"
+)
+python_setup = st.Page("views/python_setup.py", title="Python Setup", icon="🐍")
 referenzen = st.Page("views/referenzen.py", title="Referenzen & Quellen", icon="📚")
 
 ml_seiten = [
@@ -68,7 +72,7 @@ st.session_state["projekt_seiten"] = seiten_map
 
 navigation = st.navigation(
     {
-        "": [start, ueber],
+        "": [start, ueber, streamlit_intro, python_setup],
         "Maschinelles Lernen": ml_seiten,
         "Kausalität": kausal_seiten,
         "Gruppenprojekte": [themen, uebersicht, *seiten_map.values()],

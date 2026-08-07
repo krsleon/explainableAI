@@ -14,6 +14,8 @@ HAUPTSKRIPT = str(ROOT / "streamlit_app.py")
 STATISCHE_SEITEN = [
     "views/start.py",
     "views/ueber.py",
+    "views/streamlit_intro.py",
+    "views/python_setup.py",
     "views/ml/grundlagen.py",
     "views/ml/lineare_regression.py",
     "views/ml/regularisierung.py",
