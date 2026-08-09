@@ -1,30 +1,50 @@
-"""Kapitel Kausalität: DAGs & Confounding.
+"""Gemeinsamer Einstieg Kausalinferenz, Teil 3: Identification & Assumptions.
 
 Kausale Graphen als Sprache für Annahmen, die drei Grundmuster
-(Confounder, Mediator, Collider) interaktiv, Backdoor-Kriterium und ein
-Vorgeschmack auf Causal Discovery.
+(Confounder, Mediator, Collider) interaktiv.
 """
 
 import numpy as np
 import streamlit as st
 
-from utils.theming import gruppen_aufgabe, kapitel_kopf, merkkasten
+from utils.theming import gruppen_aufgabe, kapitel_kopf, merkkasten, FARBEN, vertiefung
 
 kapitel_kopf(
-    "🕸️",
-    "DAGs & Confounding",
-    "Eine Sprache für Ursachen und die Frage, wofür man adjustieren darf",
+    "🧭",
+    "Identifikation: Annahmen verbinden Daten und Kausalität",
+    "Wie kausale Modelle begründen, was aus Beobachtungsdaten gelernt werden kann",
 )
 
 # ---------------------------------------------------------------- Intro
 st.markdown(
-    """
-Im Kapitel „Korrelation ≠ Kausalität“ hat die Adjustierung für $Z$ die
-Scheinkorrelation beseitigt. Offen blieb die Frage, welche Variablen in die
-Regression gehören. Die Antwort erfordert ein Modell der Kausalstruktur, und
-die kompakteste Sprache dafür sind **Directed Acyclic Graphs (DAGs)**:
+    r"""
+Der ATE ist über kontrafaktische Outcomes definiert, von denen wir pro Person
+nur eines beobachten. **Identification** bezeichnet den logischen Schritt, der
+unter expliziten Annahmen aus dieser nicht beobachtbaren Zielgröße eine Funktion
+beobachtbarer Daten macht.
 
-- **Knoten** stehen für Variablen, **Pfeile** für direkte kausale Einflüsse.
+Diese Annahmen sind kein technisches Detail. Sie sind der eigentliche Kern einer
+kausalen Analyse. Daten können uns sagen, **welche Verteilungen wir beobachten**;
+welcher Vergleich eine kausale Intervention repräsentiert, hängt zusätzlich von
+unserem Modell der Welt ab.
+"""
+)
+
+
+# ------------------------------------------------------ DAG als Annahmensprache
+st.markdown("## Ein DAG als Sprache für Annahmen")
+st.markdown(
+    """
+Directed Acyclic Graphs (DAGs) sind eine kompakte Möglichkeit, solche Annahmen
+sichtbar zu machen. Für den gemeinsamen Einstieg genügt ein einziges Muster:
+Ein Merkmal $Z$ beeinflusst sowohl die Behandlung $D$ als auch das Outcome $Y$.
+Dann erzeugt der Pfad über $Z$ einen nicht-kausalen Zusammenhang zwischen
+Treatment und Outcome.
+
+Generell gilt:
+
+- **Knoten** stehen für Variablen, 
+- **Pfeile** für direkte kausale Einflüsse, 
 - *Directed*: Pfeile haben eine Richtung, von der Ursache zur Wirkung.
 - *Acyclic*: Es gibt keine Schleifen, nichts verursacht sich selbst über Umwege.
 
@@ -48,12 +68,15 @@ zusammen:
 | Chain | $X \rightarrow W \rightarrow Y$ | Mediator |
 | Collider | $X \rightarrow W \leftarrow Y$ | Collider |
 
-Wähle unten ein Muster und den wahren direkten Effekt $c$ von $X$ auf $Y$.
-Verglichen werden zwei Auswertungen: eine einfache Regression von $Y$ auf $X$
-(**ohne** Adjustierung) und eine multiple Regression von $Y$ auf $X$ und $W$
-(**mit** Adjustierung). Das zentrale Ergebnis lautet: Adjustierung ist
-**nicht in jeder Struktur korrekt**. Sie kann Verzerrung beseitigen, den
-Estimand verändern oder Verzerrung überhaupt erst erzeugen.
+Warum ist diese Unterscheidung wichtig? Weil die gleiche beobachtete Variable je 
+nach kausaler Geschichte ganz unterschiedlich behandelt werden muss.
+
+Nehmen wir ein einfaches Beispiel aus dem Online-Marketing. Wir interessieren uns 
+dafür, ob das Sehen einer Werbung $X$ die Kaufentscheidung $Y$ beeinflusst. 
+Zusätzlich beobachten wir eine Variable $W$, die etwas mit dem **Interesse am 
+Produkt** zu tun hat.
+
+Für die Identifikation entscheidend ist, **welche Rolle $W$ im kausalen Prozess spielt**.
 """
 )
 
@@ -129,111 +152,198 @@ with spalte_zahlen:
 
 if struktur.startswith("Confounder"):
     st.success(
-        "**Adjustierung hilft:** W ist ein Confounder, der Backdoor-Pfad "
-        "X ← W → Y verzerrt die naive Schätzung. Mit Adjustierung trifft die "
-        "Schätzung das wahre c."
+        "**Adjustierung hilft:** Angenommen, das Produktinteresse W bestand "
+        "bereits **vor** der Werbung. Personen mit höherem Interesse bekommen "
+        "durch Targeting eher die Werbung X zu sehen und kaufen das Produkt Y "
+        "auch unabhängig von der Werbung häufiger. W ist damit ein Confounder "
+        "auf dem Backdoor-Pfad X ← W → Y. Ohne Adjustierung überschätzen wir "
+        "den Werbeeffekt; mit Adjustierung können wir den direkten Effekt c "
+        "besser identifizieren."
     )
 elif struktur.startswith("Mediator"):
     st.warning(
-        "**Es kommt auf die Fragestellung an:** W liegt auf dem Wirkpfad. "
-        "Ohne Adjustierung misst du den **totalen** Effekt (direkt plus über "
-        "W), mit Adjustierung nur den **direkten** Pfad c. Wer den "
-        "Gesamteffekt einer Maßnahme wissen will, darf den Mediator nicht "
-        "kontrollieren."
+        "**Es kommt auf die Fragestellung an:** Angenommen, das Produktinteresse "
+        "W entsteht **durch** die Werbung. Die Werbung X steigert also zunächst "
+        "das Interesse und dieses erhöht anschließend die Kaufwahrscheinlichkeit Y. "
+        "Dann liegt W auf dem Wirkpfad X → W → Y und ist ein Mediator. Ohne "
+        "Adjustierung messen wir den **totalen Effekt** der Werbung. Mit "
+        "Adjustierung für W entfernen wir den über das Interesse vermittelten "
+        "Teil und schätzen nur den **direkten Effekt** c."
     )
 else:
     st.error(
-        "**Adjustierung schadet:** Ohne Adjustierung stimmt die Schätzung. "
-        "W ist ein Collider, X und Y verursachen W gemeinsam. Wer für W "
-        "adjustiert, öffnet einen künstlichen Pfad zwischen X und Y und "
-        "**erzeugt** Verzerrung, wo zuvor keine war (Collider Bias, auch "
-        "Selection Bias)."
+        "**Adjustierung schadet:** Stell dir W hier als eine Auswahlvariable "
+        "wie den **Klick auf die Produktseite** vor. Ein Klick kann sowohl durch "
+        "die Werbung X als auch durch eine bereits vorhandene Kaufneigung bzw. "
+        "den späteren Kauf Y begünstigt werden. W ist damit ein Collider. Wenn "
+        "wir nur Klickende betrachten oder für W adjustieren, öffnen wir einen "
+        "künstlichen Zusammenhang zwischen X und Y und erzeugen **Collider Bias** "
+        "bzw. **Selection Bias**."
     )
 
-st.markdown("## Das Backdoor-Kriterium")
+with vertiefung("Backdoor Critereon"):
+    st.markdown("## Das Backdoor-Kriterium")
+    st.markdown(
+        r"""
+    Pfade, die mit einem Pfeil *in* die Treatment-Variable beginnen, etwa
+    $X \leftarrow W \rightarrow Y$, heißen **Backdoor Paths**. Sie transportieren
+    nicht-kausale Assoziation. Das **Backdoor Criterion** (Pearl) präzisiert,
+    wann eine Adjustierungsmenge den kausalen Effekt identifiziert:
+    """
+    )
+
+    merkkasten(
+        "Backdoor Criterion (Definition)",
+        "Eine Variablenmenge S erfüllt das Backdoor Criterion relativ zu (X, Y), "
+        "wenn (i) kein Element von S ein Nachfahre von X ist und (ii) S jeden "
+        "Backdoor Path zwischen X und Y blockiert. Ein Pfad ist blockiert, wenn "
+        "er eine Chain oder Fork enthält, deren Mittelknoten in S liegt, oder "
+        "einen Collider, der samt seinen Nachfahren <i>nicht</i> in S liegt "
+        "(d-Separation).",
+        typ="definition",
+    )
+
+    st.markdown(
+        r"""
+    Erfüllt $S$ das Backdoor Criterion, lässt sich der Interventionseffekt durch
+    beobachtbare Größen ausdrücken (**Adjustment Formula**):
+
+    $$
+    E\big[Y \mid \mathrm{do}(X = x)\big]
+    = \sum_{s} E\big[Y \mid X = x, S = s\big]\, P(S = s).
+    $$
+
+    Damit wird die Wahl der Kontrollvariablen zu einer mechanischen Prüfung am
+    Graphen. Bauchgefühl und die verbreitete Heuristik, mehr Kontrollvariablen
+    seien stets besser, werden überflüssig. Der Collider-Fall zeigt, warum diese
+    Heuristik gefährlich ist: Er tritt überall dort auf, wo **Selektion** im
+    Spiel ist. Untersucht man etwa nur zugelassene Studierende, wobei die
+    Zulassung ein Collider von Talent und Fleiß ist, entsteht innerhalb der
+    Auswahl eine negative Korrelation zwischen Talent und Fleiß, die in der
+    Gesamtbevölkerung nicht existiert (*Collider Bias*, *Sample Selection Bias*).
+    """
+    )
+
+with vertiefung("Causal Discovery"):
+    st.markdown("## Ausblick: Causal Discovery")
+    st.markdown(
+        r"""
+    Bisher haben wir den DAG als gegeben **angenommen**. **Causal Discovery**
+    kehrt die Blickrichtung um: Algorithmen wie der **PC-Algorithmus** testen
+    systematisch bedingte Unabhängigkeiten, also Aussagen der Form
+    $X \perp Y \mid Z$, und schließen daraus, welche Graphstrukturen mit den
+    Daten vereinbar sind. Die folgenden Kennzahlen stammen aus einer Simulation
+    mit verborgener Struktur. Versuche, sie zu rekonstruieren:
+    """
+    )
+
+
+    @st.cache_data
+    def discovery_daten(n: int = 4000, seed: int = 21):
+        rng = np.random.default_rng(seed)
+        x = rng.normal(0, 1, n)          # verborgene Wahrheit: Kette X → Z → Y
+        z = x + rng.normal(0, 1, n)
+        y = z + rng.normal(0, 1, n)
+        return x, z, y
+
+
+    def partielle_korrelation(a, b, kontrolle):
+        rest_a = a - np.polyval(np.polyfit(kontrolle, a, 1), kontrolle)
+        rest_b = b - np.polyval(np.polyfit(kontrolle, b, 1), kontrolle)
+        return np.corrcoef(rest_a, rest_b)[0, 1]
+
+
+    dx, dz, dy = discovery_daten()
+    korr_xy = np.corrcoef(dx, dy)[0, 1]
+    korr_xz = np.corrcoef(dx, dz)[0, 1]
+    korr_zy = np.corrcoef(dz, dy)[0, 1]
+    partiell_xy = partielle_korrelation(dx, dy, dz)
+
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Korr(X, Y)", f"{korr_xy:.2f}")
+    k2.metric("Korr(X, Z)", f"{korr_xz:.2f}")
+    k3.metric("Korr(Z, Y)", f"{korr_zy:.2f}")
+    k4.metric("Korr(X, Y | Z)", f"{partiell_xy:.2f}", help="Korrelation von X und Y, nachdem Z herausgerechnet wurde")
+
+
+
+# --------------------------------------------------------- Landkarte der AG
+st.markdown("## Landkarte der Arbeitsgruppe")
 st.markdown(
-    r"""
-Pfade, die mit einem Pfeil *in* die Treatment-Variable beginnen, etwa
-$X \leftarrow W \rightarrow Y$, heißen **Backdoor Paths**. Sie transportieren
-nicht-kausale Assoziation. Das **Backdoor Criterion** (Pearl) präzisiert,
-wann eine Adjustierungsmenge den kausalen Effekt identifiziert:
+    """
+Verschiedene Themen von kausalem ML setzen an unterschiedlichen Stellen desselben
+wissenschaftlichen Workflows an. Die folgende Karte ist deshalb eine
+Orientierung, jedoch keine strenge Methoden-Hierarchie.
 """
 )
 
+st.graphviz_chart(
+    """
+    digraph {
+        rankdir=LR;
+        bgcolor="transparent";
+
+        node [
+            shape=box,
+            style="rounded,filled",
+            fillcolor="#EEF3FA",
+            color="#3E6DB5",
+            fontname="sans-serif"
+        ];
+
+        edge [
+            color="#5C6470",
+            fontname="sans-serif"
+        ];
+
+        Q [
+            label="Kausale Frage"
+        ];
+
+        E [
+            label="Estimand"
+        ];
+
+        A [
+            label="Annahmen & Design\\l\\
+• Kausale Effekte in randomisierten Experimenten\\l\\
+• Natürliche Experimente (RDD / DiD)\\l"
+        ];
+
+        I [
+            label="Identification\\l\\
+• DAGs / Causal Discovery\\l\\
+• Causality and LLMs\\l"
+        ];
+
+        S [
+            label="Estimation\\l\\
+• Causal Inference with ML\\l\\
+• Bayesian Methods\\l"
+        ];
+
+        R [
+            label="Robustheit & Interpretation\\l\\
+• Explainable ML / AI\\l"
+        ];
+
+        Q -> E -> A -> I -> S -> R;
+    }
+    """,
+    use_container_width=True,
+)
+
+
 merkkasten(
-    "Backdoor Criterion (Definition)",
-    "Eine Variablenmenge S erfüllt das Backdoor Criterion relativ zu (X, Y), "
-    "wenn (i) kein Element von S ein Nachfahre von X ist und (ii) S jeden "
-    "Backdoor Path zwischen X und Y blockiert. Ein Pfad ist blockiert, wenn "
-    "er eine Chain oder Fork enthält, deren Mittelknoten in S liegt, oder "
-    "einen Collider, der samt seinen Nachfahren <i>nicht</i> in S liegt "
-    "(d-Separation).",
+    "Grundprinzip von kausalen Analysen",
+    "Welchen kausalen Effekt wollt ihr verstehen, welche Annahmen machen ihn aus "
+    "euren Daten identifizierbar, und welche Teile eurer Schlussfolgerung würden "
+    "scheitern, wenn diese Annahmen verletzt sind?",
     typ="definition",
 )
 
-st.markdown(
-    r"""
-Erfüllt $S$ das Backdoor Criterion, lässt sich der Interventionseffekt durch
-beobachtbare Größen ausdrücken (**Adjustment Formula**):
-
-$$
-E\big[Y \mid \mathrm{do}(X = x)\big]
-= \sum_{s} E\big[Y \mid X = x, S = s\big]\, P(S = s).
-$$
-
-Damit wird die Wahl der Kontrollvariablen zu einer mechanischen Prüfung am
-Graphen. Bauchgefühl und die verbreitete Heuristik, mehr Kontrollvariablen
-seien stets besser, werden überflüssig. Der Collider-Fall zeigt, warum diese
-Heuristik gefährlich ist: Er tritt überall dort auf, wo **Selektion** im
-Spiel ist. Untersucht man etwa nur zugelassene Studierende, wobei die
-Zulassung ein Collider von Talent und Fleiß ist, entsteht innerhalb der
-Auswahl eine negative Korrelation zwischen Talent und Fleiß, die in der
-Gesamtbevölkerung nicht existiert (*Collider Bias*, *Sample Selection Bias*).
-"""
-)
-
-# ------------------------------------- Demo 2: Causal Discovery Teaser
-st.markdown("## Ausblick: Causal Discovery")
-st.markdown(
-    r"""
-Bisher haben wir den DAG als gegeben **angenommen**. **Causal Discovery**
-kehrt die Blickrichtung um: Algorithmen wie der **PC-Algorithmus** testen
-systematisch bedingte Unabhängigkeiten, also Aussagen der Form
-$X \perp Y \mid Z$, und schließen daraus, welche Graphstrukturen mit den
-Daten vereinbar sind. Die folgenden Kennzahlen stammen aus einer Simulation
-mit verborgener Struktur. Versuche, sie zu rekonstruieren:
-"""
-)
-
-
-@st.cache_data
-def discovery_daten(n: int = 4000, seed: int = 21):
-    rng = np.random.default_rng(seed)
-    x = rng.normal(0, 1, n)          # verborgene Wahrheit: Kette X → Z → Y
-    z = x + rng.normal(0, 1, n)
-    y = z + rng.normal(0, 1, n)
-    return x, z, y
-
-
-def partielle_korrelation(a, b, kontrolle):
-    rest_a = a - np.polyval(np.polyfit(kontrolle, a, 1), kontrolle)
-    rest_b = b - np.polyval(np.polyfit(kontrolle, b, 1), kontrolle)
-    return np.corrcoef(rest_a, rest_b)[0, 1]
-
-
-dx, dz, dy = discovery_daten()
-korr_xy = np.corrcoef(dx, dy)[0, 1]
-korr_xz = np.corrcoef(dx, dz)[0, 1]
-korr_zy = np.corrcoef(dz, dy)[0, 1]
-partiell_xy = partielle_korrelation(dx, dy, dz)
-
-k1, k2, k3, k4 = st.columns(4)
-k1.metric("Korr(X, Y)", f"{korr_xy:.2f}")
-k2.metric("Korr(X, Z)", f"{korr_xz:.2f}")
-k3.metric("Korr(Z, Y)", f"{korr_zy:.2f}")
-k4.metric("Korr(X, Y | Z)", f"{partiell_xy:.2f}", help="Korrelation von X und Y, nachdem Z herausgerechnet wurde")
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit:",
     [
         (
             "Dieses Kapitel setzt den DAG als gegeben voraus. <b>Causal "
@@ -261,7 +371,7 @@ gruppen_aufgabe(
     ),
 )
 
-# -------------------------------------------------------------- Ausblick
+
 st.markdown("## Weiterführende Literatur")
 st.markdown(
     """
@@ -279,9 +389,9 @@ with weiter_po:
         label="Weiter: Potential Outcomes & RCTs",
         icon="⚖️",
     )
-with weiter_sem:
-    st.page_link(
-        "views/kausalitaet/sem_surveys.py",
-        label="Verwandt: SEMs & Survey Experiments",
-        icon="📋",
-    )
+# with weiter_sem:
+#     st.page_link(
+#         "views/kausalitaet/sem_surveys.py",
+#         label="Verwandt: SEMs & Survey Experiments",
+#         icon="📋",
+#     )
