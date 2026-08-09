@@ -175,3 +175,66 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
     font-size: 0.8rem;
     line-height: 1.4;
 }
+
+/* --- Ablaufplan ----------------------------------------------------- */
+.ablaufplan-wrap {
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.ablaufplan-tabelle {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #D8E0EC;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    background: #FFFFFF;
+}
+
+.ablaufplan-tabelle th {
+    background: #1E3A5F;
+    color: #FFFFFF;
+    text-align: left;
+    font-weight: 700;
+    padding: 0.75rem 0.9rem;
+}
+
+.ablaufplan-tabelle td {
+    border-top: 1px solid #E3E8F0;
+    color: #22252A;
+    padding: 0.68rem 0.9rem;
+    vertical-align: top;
+}
+
+.ablaufplan-tabelle tbody tr.neuer-tag td {
+    border-top: 2px solid #C9D2E0;
+}
+
+.ablaufplan-tabelle tbody tr:nth-child(even):not(.frei) {
+    background: #F8FAFD;
+}
+
+.ablaufplan-tabelle td:first-child {
+    width: 6.5rem;
+    color: #1E3A5F;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ablaufplan-tabelle td:nth-child(2) {
+    width: 9rem;
+    color: #5C6470;
+    white-space: nowrap;
+}
+
+.ablaufplan-tabelle tr.ohne-zeit td:nth-child(3) {
+    color: #2C4A73;
+    font-style: italic;
+}
+
+.ablaufplan-tabelle tr.frei td {
+    background: #EDF6F0;
+    color: #35714F;
+    font-weight: 700;
+}

@@ -38,6 +38,7 @@ streamlit_intro = st.Page(
     "views/streamlit_intro.py", title="Was ist Streamlit?", icon="🎈"
 )
 python_setup = st.Page("views/python_setup.py", title="Python Setup", icon="🐍")
+ablaufplan = st.Page("views/ablaufplan.py", title="Ablaufplan", icon="🗓️")
 referenzen = st.Page("views/referenzen.py", title="Referenzen & Quellen", icon="📚")
 
 ml_seiten = [
@@ -72,7 +73,7 @@ st.session_state["projekt_seiten"] = seiten_map
 
 navigation = st.navigation(
     {
-        "": [start, ueber, streamlit_intro, python_setup],
+        "": [start, ueber, ablaufplan, streamlit_intro, python_setup],
         "Maschinelles Lernen": ml_seiten,
         "Kausalität": kausal_seiten,
         "Gruppenprojekte": [themen, uebersicht, *seiten_map.values()],
