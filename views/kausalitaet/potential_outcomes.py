@@ -1,8 +1,8 @@
-"""Kapitel Kausalität: Potential Outcomes & Randomized Controlled Trials.
+"""Potential Outcomes & Identification.
 
-Gott-Tabelle, Selection Bias, Randomisierung und der Umgang mit
-Non-Compliance (ITT, Per-Protocol, IV) als Grundlage für das Gruppenthema
-RCTs in der Medizin.
+Die Seite definiert kausale Effekte, visualisiert das fundamentale Problem der
+Kausalinferenz und zeigt, warum Treatment Assignment über die Identifizierbarkeit
+entscheidet.
 """
 
 import numpy as np
@@ -10,54 +10,183 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils.theming import FARBEN, gruppen_aufgabe, kapitel_kopf, merkkasten, vertiefung
+from utils.theming import FARBEN, kapitel_kopf, merkkasten, gruppen_aufgabe
 
 kapitel_kopf(
     "⚖️",
-    "Potential Outcomes & RCTs",
-    "Was wäre gewesen? Das fundamentale Problem der Kausalinferenz und die Rolle der Randomisierung",
+    "Kausale Effekte & kontrafaktische Welten",
+    "Potential Outcomes, das fundamentale Problem und die Idee der Identifikation",
 )
 
-# ---------------------------------------------------------------- Intro
+
+# ---------------------------------------------------------------- Definition
 st.markdown(
     r"""
-Was bedeutet die Aussage „das Medikament wirkt“? Die präziseste Antwort gibt
-das **Potential-Outcomes-Framework** (Neyman/Rubin). Wir betrachten ein
-binäres Treatment
+Eine kausale Aussage vergleicht zwei mögliche Zustände **derselben Einheit**.
+Für ein binäres Treatment $D_i\in\{0,1\}$ definieren wir daher zwei potenzielle
+Outcomes:
+
+- $Y_i(1)$: das Outcome von Person $i$, **wenn sie behandelt würde**,
+- $Y_i(0)$: das Outcome derselben Person, **wenn sie nicht behandelt würde**.
+
+Der **Individual Treatment Effect** ist
 
 $$
-D_i = \begin{cases} 1, & \text{wenn Person } i \text{ behandelt wird,} \\
-0, & \text{sonst,} \end{cases}
+\mathrm{ITE} = Y_i(1)-Y_i(0).
 $$
 
-und definieren für jede Person $i$ zwei **potenzielle Outcomes**:
-
-- $Y_i^1$: das Ergebnis von Person $i$, *wenn* sie behandelt wird,
-- $Y_i^0$: das Ergebnis derselben Person, *wenn* sie nicht behandelt wird.
-
-Beide beziehen sich auf dieselbe Person zum selben Zeitpunkt, beobachtet
-wird jedoch stets nur eines von beiden. Welches, bestimmt der
-Treatment-Status über die *Switching Equation*:
+Das tatsächlich beobachtete Outcome ist dagegen nur
 
 $$
-Y_i = D_i\, Y_i^1 + (1 - D_i)\, Y_i^0 .
+Y_i = D_iY_i(1)+(1-D_i)Y_i(0).
 $$
 
-Der **Individual Treatment Effect** $\mathrm{ITE}_i = Y_i^1 - Y_i^0$ ist
-deshalb prinzipiell nicht identifizierbar. Dies ist das **fundamentale
-Problem der Kausalinferenz**: Kausalinferenz ist im Kern ein Problem
-fehlender Daten. Auf Populationsebene definieren wir daher den
+Wir sehen also immer nur einen der beiden möglichen Zustände.
+
+Der ITE ist deshalb prinzipiell nicht identifizierbar. 
+Dies ist das **fundamentale Problem der Kausalen Inferenz**: 
+Kausale Inferenz ist im Kern ein Problem fehlender Daten. 
+"""
+)
+
+merkkasten(
+    "Definition",
+    "Kausalität ist kontrafaktisch: Ein Treatment-Effekt vergleicht das Outcome "
+    "derselben Einheit unter zwei unterschiedlichen Behandlungszuständen. "
+    "Beobachten können wir pro Einheit jedoch nur einen dieser Zustände.",
+    typ="definition",
+)
+
+# ------------------------------------------------ Demo 1: Oracle table
+st.markdown("## Demo: Die Orakle-Tabelle und das fundamentale Problem")
+st.markdown(
+    """
+Stell dir zunächst vor, wir hätten Zugriff auf beide potenzielle Outcomes. Die
+Tabelle zeigt einen Gesundheits-Score von 0 bis 100 für acht Patient:innen. Im
+"Oracle Mode" kennen wir die kontrafaktische Welt; in realen Daten nicht.
+"""
+)
+
+ORACLE = pd.DataFrame(
+    {
+        "Person": ["A", "B", "C", "D", "E", "F", "G", "H"],
+        "Y(0) ohne Behandlung": [45, 50, 55, 60, 75, 80, 85, 90],
+        "Y(1) mit Behandlung": [60, 62, 65, 72, 82, 88, 92, 98],
+    }
+)
+ORACLE["individueller Effekt"] = ORACLE["Y(1) mit Behandlung"] - ORACLE["Y(0) ohne Behandlung"]
+ORACLE["behandelt"] = ORACLE["Y(0) ohne Behandlung"] < 70
+
+wahrer_ate = ORACLE["individueller Effekt"].mean()
+
+oracle_modus = st.toggle("Oracle Mode: beide potenziellen Outcomes sichtbar", value=True)
+
+if oracle_modus:
+    st.dataframe(ORACLE.drop(columns=["behandelt"]), hide_index=True, use_container_width=True)
+    st.metric("Wahrer Average Treatment Effect (ATE)", f"{wahrer_ate:+.1f} Punkte")
+    st.caption(
+        "Hier können wir den kausalen Effekt tatsächlich berechnen, weil die "
+        "Simulation beide Welten kennt."
+    )
+else:
+    beobachtet = ORACLE.copy()
+    beobachtet["Treatment"] = np.where(beobachtet["behandelt"], "Behandlung", "Kontrolle")
+    beobachtet["beobachtetes Y"] = np.where(
+        beobachtet["behandelt"],
+        beobachtet["Y(1) mit Behandlung"],
+        beobachtet["Y(0) ohne Behandlung"],
+    )
+    st.dataframe(
+        beobachtet[["Person", "Treatment", "beobachtetes Y"]],
+        hide_index=True,
+        use_container_width=True,
+    )
+    mit = beobachtet.loc[beobachtet["behandelt"], "beobachtetes Y"].mean()
+    ohne = beobachtet.loc[~beobachtet["behandelt"], "beobachtetes Y"].mean()
+    naive = mit - ohne
+    c1, c2 = st.columns(2)
+    c1.metric("Beobachtete Gruppendifferenz", f"{naive:+.1f} Punkte")
+    st.error(
+        "Mit dem Umschalten ist pro Person genau ein Potential Outcome verschwunden. "
+        "Das andere ist kontrafaktisch. Der individuelle Treatment-Effekt ist damit "
+        "nicht direkt beobachtbar."
+    )
+
+st.markdown(
+    r"""
+Dieses fehlende Gegenstück ist das **fundamentale Problem der Kausalinferenz**.
+Es ist kein Problem, das ein größerer Datensatz oder ein leistungsfähigeres
+Machine-Learning-Modell für die einzelne Person einfach lösen kann.
+
+Auf Populationsebene definieren wir deshalb beispielsweise den
 **Average Treatment Effect**
 
 $$
-\mathrm{ATE} = E\big[Y^1 - Y^0\big] = E\big[Y^1\big] - E\big[Y^0\big]
+\mathrm{ATE}=E[Y(1)-Y(0)] = E[Y(1)]-E[Y(0)].
 $$
 
-sowie den Effekt auf die Behandelten, den **Average Treatment Effect on the
-Treated** $\mathrm{ATT} = E\big[Y^1 - Y^0 \mid D = 1\big]$, und analog den
-$\mathrm{ATU} = E\big[Y^1 - Y^0 \mid D = 0\big]$ für die Unbehandelten.
+Auch dieser Estimand enthält zunächst kontrafaktische Größen. Die entscheidende
+Frage lautet daher: **Unter welchen Annahmen können wir ihn durch beobachtbare
+Größen ausdrücken?**
+
+Wie wir sehen, entscheidet der **Treatment Assignment Mechanismus** darüber, ob die
+beobachteten Daten die gewünschte kausale Größe enthalten. In randomisierten
+Experimenten ist die Treatment-Zuweisung unabhängig von den potenziellen Outcomes.
+In beobachteten Daten ist sie es in der Regel nicht. Die Verzerrung auf Populationsebene
+lässt sich hier allgemein zerlegen.
+
+Für den einfachen Mittelwertvergleich (*Simple Difference in Outcomes*, SDO) gilt:
+
+$$
+\underbrace{E[Y \mid D{=}1] - E[Y \mid D{=}0]}_{\text{SDO}}
+= \mathrm{ATE}
++ \underbrace{E\big[Y^0 \mid D{=}1\big] - E\big[Y^0 \mid D{=}0\big]}_{\text{Selection Bias}}
++ \underbrace{(1 - \pi)\,(\mathrm{ATT} - \mathrm{ATU})}_{\text{Heterogeneous Treatment Effect Bias}},
+$$
+
+wobei $\pi$ den Anteil der Behandelten bezeichnet. Der Selection Bias
+vergleicht die *kontrafaktischen* unbehandelten Outcomes beider Gruppen. Er
+ist genau dann von null verschieden, wenn sich Behandelte und Unbehandelte
+auch ohne Behandlung unterschieden hätten, wie in der Tabelle oben, in der
+gerade die Kränkeren zum Medikament greifen.
+
 """
 )
+
+
+# ---------------------------------------- Estimand / Identification / Estimation
+st.markdown("## Von der Frage zur Zahl")
+
+begriffe = pd.DataFrame(
+    {
+        "Schritt": ["1. Kausale Frage", "2. Estimand", "3. Identification", "4. Estimation", "5. Estimate"],
+        "Leitfrage": [
+            "Welche Intervention interessiert uns?",
+            "Welche kausale Zielgröße beschreibt diese Frage?",
+            "Unter welchen Annahmen ist die Zielgröße aus beobachtbaren Daten lernbar?",
+            "Mit welcher Rechenvorschrift schätzen wir die identifizierte Größe?",
+            "Welchen Zahlenwert erhalten wir in dieser Stichprobe?",
+        ],
+        "Beispiel": [
+            "Wirkt die Behandlung?",
+            "ATE",
+            "z. B. zufällige Zuweisung / geeignete Vergleichbarkeit",
+            "z. B. Differenz der Gruppenmittelwerte",
+            "+7.4 Punkte",
+        ],
+    }
+)
+st.dataframe(begriffe, hide_index=True, use_container_width=True)
+
+merkkasten(
+    "Identification vor Estimation",
+    "Ein ausgefeilter Estimator kann ein Identifikationsproblem nicht reparieren. "
+    "Bevor wir and Algorithmen, Standardfehler oder Machine Learning denken, "
+    "müssen wir begründen, warum die beobachteten Daten überhaupt die gewünschte "
+    "kausale Größe enthalten.",
+    typ="merke",
+)
+
 
 merkkasten(
     "Begriffe: Estimand, Estimator, Estimate",
@@ -74,124 +203,30 @@ merkkasten(
     typ="definition",
 )
 
-# ------------------------------------------------ Demo 1: Gott-Tabelle
-st.markdown("## Demo: Die Gott-Tabelle")
-st.markdown(
-    """
-Stell dir vor, wir wären allwissend und sähen **beide** potenziellen
-Outcomes (Gesundheits-Score 0 bis 100) von acht Patientinnen und Patienten.
-Das Medikament hilft in diesem Beispiel jeder einzelnen Person, mit Effekten
-zwischen +5 und +15 Punkten. Schalte anschließend den Gott-Modus aus und
-betrachte, was in der Realität beobachtbar bleibt, wenn, wie so häufig, vor
-allem die Kränkeren zum Medikament greifen.
-"""
-)
 
-GOTT = pd.DataFrame(
-    {
-        "Person": ["A", "B", "C", "D", "E", "F", "G", "H"],
-        "Y⁰ (ohne)": [45, 50, 55, 60, 75, 80, 85, 90],
-        "Y¹ (mit)": [60, 62, 65, 72, 82, 88, 92, 98],
-    }
-)
-GOTT["Effekt Y¹−Y⁰"] = GOTT["Y¹ (mit)"] - GOTT["Y⁰ (ohne)"]
-GOTT["nimmt Medikament?"] = GOTT["Y⁰ (ohne)"] < 70  # die Kränkeren greifen zu
-
-wahrer_ate = GOTT["Effekt Y¹−Y⁰"].mean()
-
-gott_modus = st.toggle("Gott-Modus: beide potenzielle Outcomes anzeigen", value=True)
-
-if gott_modus:
-    st.dataframe(
-        GOTT[["Person", "Y⁰ (ohne)", "Y¹ (mit)", "Effekt Y¹−Y⁰"]],
-        hide_index=True,
-        use_container_width=True,
-    )
-    st.metric("Wahrer durchschnittlicher Effekt (ATE)", f"+{wahrer_ate:.1f} Punkte")
-else:
-    beobachtet = GOTT.copy()
-    beobachtet["Gruppe"] = np.where(
-        beobachtet["nimmt Medikament?"], "Medikament", "kein Medikament"
-    )
-    beobachtet["beobachtetes Y"] = np.where(
-        beobachtet["nimmt Medikament?"],
-        beobachtet["Y¹ (mit)"],
-        beobachtet["Y⁰ (ohne)"],
-    )
-    st.dataframe(
-        beobachtet[["Person", "Gruppe", "beobachtetes Y"]],
-        hide_index=True,
-        use_container_width=True,
-    )
-    mit_med = beobachtet.loc[beobachtet["nimmt Medikament?"], "beobachtetes Y"].mean()
-    ohne_med = beobachtet.loc[~beobachtet["nimmt Medikament?"], "beobachtetes Y"].mean()
-    naive = mit_med - ohne_med
-    metrik_naiv, metrik_wahr = st.columns(2)
-    metrik_naiv.metric(
-        "Naiver Vergleich (Mittel mit minus Mittel ohne)", f"{naive:+.1f} Punkte"
-    )
-    metrik_wahr.metric("Wahrer ATE (aus dem Gott-Modus)", f"+{wahrer_ate:.1f} Punkte")
-    st.error(
-        "**Das Medikament erscheint schädlich, obwohl es allen hilft.** "
-        "Die Medikamentengruppe besteht aus den Kränkeren. Verglichen wird "
-        "nicht mit gegen ohne Medikament, sondern krank gegen gesund. Das "
-        "ist **Selection Bias**: Wer behandelt wird, unterscheidet sich "
-        "systematisch von den Unbehandelten."
-    )
-
+# ------------------------------------------ Demo 2: Assignment mechanism
+st.markdown("## Demo: Der Zuteilungsmechanismus entscheidet")
 st.markdown(
     r"""
-Diese Verzerrung lässt sich allgemein zerlegen. Für den einfachen
-Mittelwertvergleich (*Simple Difference in Outcomes*, SDO) gilt:
+Warum kann der einfache Vergleich von Treatment- und Kontrollgruppe manchmal
+einen kausalen Effekt identifizieren und manchmal nicht? Entscheidend ist, **wie
+Menschen in die Behandlung gelangen**.
 
-$$
-\underbrace{E[Y \mid D{=}1] - E[Y \mid D{=}0]}_{\text{SDO}}
-= \mathrm{ATE}
-+ \underbrace{E\big[Y^0 \mid D{=}1\big] - E\big[Y^0 \mid D{=}0\big]}_{\text{Selection Bias}}
-+ \underbrace{(1 - \pi)\,(\mathrm{ATT} - \mathrm{ATU})}_{\text{Heterogeneous Treatment Effect Bias}},
-$$
-
-wobei $\pi$ den Anteil der Behandelten bezeichnet. Der Selection Bias
-vergleicht die *kontrafaktischen* unbehandelten Outcomes beider Gruppen. Er
-ist genau dann von null verschieden, wenn sich Behandelte und Unbehandelte
-auch ohne Behandlung unterschieden hätten, wie in der Tabelle oben, in der
-gerade die Kränkeren zum Medikament greifen.
-"""
-)
-
-# --------------------------------------- Demo 2: Randomisierung
-st.markdown("## Demo: Randomisierung und die Independence-Annahme")
-st.markdown(
-    r"""
-Der **Randomized Controlled Trial (RCT)** löst das Selektionsproblem per
-Design: Der Zufall entscheidet über die Behandlung. Formal stellt die
-Randomisierung die **Independence Assumption** (auch *Ignorability*) sicher:
-
-$$
-(Y^1, Y^0) \;\perp\; D .
-$$
-
-Die Zuteilung enthält dann keine Information über die potenziellen Outcomes,
-alle Mechanismen der Selbstselektion sind ausgeschaltet. Daraus folgt
-$E\big[Y^0 \mid D{=}1\big] = E\big[Y^0 \mid D{=}0\big]$: Selection Bias und
-Heterogenitätsbias verschwinden, und der einfache Mittelwertvergleich
-identifiziert den ATE:
-
-$$
-E[Y \mid D{=}1] - E[Y \mid D{=}0] = E\big[Y^1\big] - E\big[Y^0\big] = \mathrm{ATE}.
-$$
-
-Vergleiche beide Zuteilungsmechanismen in der Simulation:
+Wir simulieren einen Gesundheits-Score mit einem wahren Treatment-Effekt von
+$+8$ Punkten. Krankheitsschwere beeinflusst das Outcome. In Beobachtungsdaten
+kann sie zusätzlich beeinflussen, wer behandelt wird.
 """
 )
 
 zuteilung = st.radio(
-    "Wie kommt die Behandlung zu den Menschen?",
-    ["Selbstselektion (Kränkere greifen eher zu)", "Randomisierung (Münzwurf)"],
+    "Treatment Assignment",
+    ["Selbstselektion / ärztliche Auswahl", "Randomisierte Zuweisung"],
     horizontal=True,
 )
 n_studie = st.select_slider(
-    "Studiengröße", options=[50, 100, 200, 500, 1000, 5000], value=200
+    "Stichprobengröße",
+    options=[50, 100, 200, 500, 1000, 5000],
+    value=200,
 )
 
 WAHRER_EFFEKT = 8.0
@@ -200,54 +235,74 @@ WAHRER_EFFEKT = 8.0
 @st.cache_data
 def studie_simulieren(randomisiert: bool, n: int, seed: int = 4):
     rng = np.random.default_rng(seed)
-    schwere = rng.uniform(0, 1, n)  # Krankheitsschwere (auch unbeobachtet denkbar)
+    schwere = rng.uniform(0, 1, n)
     if randomisiert:
         d = rng.integers(0, 2, n)
     else:
-        d = (rng.uniform(0, 1, n) < 0.15 + 0.7 * schwere).astype(int)
+        # Schwerere Patient:innen werden mit höherer Wahrscheinlichkeit behandelt.
+        d = (rng.uniform(0, 1, n) < 0.10 + 0.80 * schwere).astype(int)
     y0 = 85 - 30 * schwere + rng.normal(0, 5, n)
     y = y0 + WAHRER_EFFEKT * d
     return schwere, d, y
 
 
-schwere, d, y_beob = studie_simulieren(zuteilung.startswith("Randomisierung"), n_studie)
+schwere, d, y_beob = studie_simulieren(zuteilung.startswith("Randomisierte"), n_studie)
 
 diff = y_beob[d == 1].mean() - y_beob[d == 0].mean()
 se = np.sqrt(
-    y_beob[d == 1].var(ddof=1) / (d == 1).sum() + y_beob[d == 0].var(ddof=1) / (d == 0).sum()
+    y_beob[d == 1].var(ddof=1) / max((d == 1).sum(), 1)
+    + y_beob[d == 0].var(ddof=1) / max((d == 0).sum(), 1)
 )
 
 spalte_balance, spalte_schaetzung = st.columns(2)
 with spalte_balance:
     fig_balance = go.Figure()
     fig_balance.add_bar(
-        x=["kein Medikament", "Medikament"],
+        x=["Kontrolle", "Treatment"],
         y=[schwere[d == 0].mean(), schwere[d == 1].mean()],
         marker_color=[FARBEN["gletscher"], FARBEN["sonne"]],
     )
     fig_balance.update_layout(
-        title="Balance-Check: mittlere Krankheitsschwere",
-        yaxis_title="Ø Schwere (0–1)", height=360, yaxis=dict(range=[0, 1]),
+        title="Sind die Gruppen vergleichbar?",
+        yaxis_title="Ø Krankheitsschwere",
+        yaxis={"range": [0, 1]},
+        height=360,
     )
     st.plotly_chart(fig_balance, use_container_width=True)
+
 with spalte_schaetzung:
     fig_schaetz = go.Figure()
-    fig_schaetz.add_bar(
-        x=["Schätzung"], y=[diff],
-        error_y=dict(type="data", array=[1.96 * se]),
-        marker_color=FARBEN["nacht"], width=[0.4],
+
+    fig_schaetz.add_scatter(
+        x=["Gruppendifferenz"],
+        y=[diff],
+        mode="markers",
+        marker={"color": FARBEN["nacht"], "size": 12,},
+        error_y={
+            "type": "data",
+            "array": [1.96 * se],
+            "visible": True,
+        },
+        name="Geschätzter Effekt",
     )
+
     fig_schaetz.add_hline(
-        y=WAHRER_EFFEKT, line_dash="dash", line_color=FARBEN["wiese"],
-        annotation_text="wahrer Effekt (+8)",
+        y=WAHRER_EFFEKT,
+        line_dash="dash",
+        line_color=FARBEN["wiese"],
+        annotation_text="wahrer ATE (+8)",
     )
+
     fig_schaetz.update_layout(
-        title="Geschätzter Effekt (± 95 %-Intervall)",
-        yaxis_title="Punkte", height=360,
+        title="Geschätzter Effekt (± 95%-Intervall)",
+        yaxis_title="Punkte",
+        height=360,
+        showlegend=False,
     )
+
     st.plotly_chart(fig_schaetz, use_container_width=True)
 
-if zuteilung.startswith("Randomisierung"):
+if zuteilung.startswith("Randomisierte"):
     st.success(
         "**Balance:** Beide Gruppen sind im Mittel gleich krank, der "
         "Gruppenvergleich isoliert also den Medikamenteneffekt. Mit "
@@ -262,91 +317,41 @@ else:
         "Intervall wird enger. Man schätzt präzise das Falsche."
     )
 
-# --------------------------------------- Demo 3: Non-Compliance
-with vertiefung("Wenn nicht alle mitmachen: ITT, Per-Protocol und IV"):
-    st.markdown(
-        r"""
-    In klinischen Studien lässt sich die *Zuweisung* $Z$ randomisieren, nicht
-    aber die tatsächliche *Einnahme* $D$: Ein Teil der Zugewiesenen nimmt das
-    Medikament nicht (**Non-Compliance**). Angenommen, vor allem die weniger
-    schwer Erkrankten halten die Therapie durch. Für die Auswertung stehen drei
-    Ansätze zur Wahl:
+st.markdown(
+    r"""
+Randomisierung ist damit **eine** besonders transparente Identifikationsstrategie:
 
-    - **Intention-to-Treat (ITT):** Vergleich nach *Zuweisung* $Z$. Die
-      Randomisierung bleibt intakt, geschätzt wird jedoch der Effekt des
-      Angebots, bei Non-Compliance eine verwässerte Größe.
-    - **Per-Protocol:** Vergleich nach tatsächlicher *Einnahme* $D$. Da die
-      Einnahme selbstselektiert ist, kehrt der Selection Bias zurück.
-    - **Instrumental Variables (IV):** Die randomisierte Zuweisung $Z$ dient als
-      **Instrument** für die Einnahme $D$. Der **Wald Estimator**
+$$
+(Y(1),Y(0)) \perp D.
+$$
 
-    $$
-    \widehat{\mathrm{LATE}}
-    = \frac{E[Y \mid Z{=}1] - E[Y \mid Z{=}0]}{E[D \mid Z{=}1] - E[D \mid Z{=}0]}
-    = \frac{\mathrm{ITT}}{\text{Complier-Anteil}}
-    $$
+Die Zuteilung enthält keine Information über die potenziellen Outcomes,
+alle Mechanismen der Selbstselektion sind ausgeschaltet. Daraus folgt
+$E\big[Y^0 \mid D{=}1\big] = E\big[Y^0 \mid D{=}0\big]$: Selection Bias und
+Heterogenitätsbias verschwinden, und der einfache Mittelwertvergleich
+identifiziert den ATE:
 
-    identifiziert den **Local Average Treatment Effect (LATE)** für die
-    **Complier**. Er ist gültig unter der *Exclusion Restriction*, nach der die
-    Zuweisung ausschließlich über die Einnahme wirkt, und unter *Monotonicity*,
-    nach der niemand systematisch das Gegenteil der Zuweisung tut.
-    """
-    )
+$$
+E[Y \mid D{=}1] - E[Y \mid D{=}0] = E\big[Y^1\big] - E\big[Y^0\big] = \mathrm{ATE}.
+$$
 
-    anteil_complier = st.slider("Anteil Complier (halten sich an die Zuweisung)", 0.2, 1.0, 0.6, step=0.05)
-
-
-    @st.cache_data
-    def compliance_studie(anteil: float, n: int = 20000, seed: int = 8):
-        rng = np.random.default_rng(seed)
-        schwere = rng.uniform(0, 1, n)
-        z = rng.integers(0, 2, n)
-        complier = schwere < anteil          # die weniger Kranken halten durch
-        d = z * complier.astype(int)         # einseitige Non-Compliance
-        y = 85 - 30 * schwere + WAHRER_EFFEKT * d + rng.normal(0, 5, n)
-        itt = y[z == 1].mean() - y[z == 0].mean()
-        per_protocol = y[d == 1].mean() - y[d == 0].mean()
-        iv = itt / complier.mean()
-        return itt, per_protocol, iv
-
-
-    itt, per_protocol, iv = compliance_studie(anteil_complier)
-
-    fig_nc = go.Figure()
-    fig_nc.add_bar(
-        x=["ITT (nach Zuweisung)", "Per-Protocol (nach Einnahme)", "IV / LATE"],
-        y=[itt, per_protocol, iv],
-        marker_color=[FARBEN["gletscher"], FARBEN["beere"], FARBEN["wiese"]],
-    )
-    fig_nc.add_hline(
-        y=WAHRER_EFFEKT, line_dash="dash", line_color=FARBEN["schiefer"],
-        annotation_text="wahrer Effekt der Einnahme (+8)",
-    )
-    fig_nc.update_layout(yaxis_title="geschätzter Effekt (Punkte)", height=380)
-    st.plotly_chart(fig_nc, use_container_width=True)
-
-    st.markdown(
-        f"""
-    Bei **{anteil_complier:.0%} Compliern** ergibt sich: ITT ≈ {itt:.1f}
-    (verwässert, denn geschätzt wird der Effekt des Angebots, was allerdings
-    häufig genau die politikrelevante Größe ist), Per-Protocol ≈
-    {per_protocol:.1f} (verzerrt, weil die Einnehmenden systematisch gesünder
-    sind) und IV ≈ {iv:.1f} (trifft den wahren Einnahme-Effekt, gültig für die
-    Complier).
-    """
-    )
+Randomisierung ist aber nicht die einzige Identifikationsstrategie. Viele Forschungsfragen lassen keine
+Randomisierung zu. Dann müssen andere Designs oder Annahmen begründen, warum die
+beobachteten Vergleichsgruppen ein glaubwürdiges Counterfactual liefern.
+"""
+)
 
 merkkasten(
-    "Merke",
-    "Randomisierung macht Behandlungs- und Kontrollgruppe <b>in allem</b> "
-    "vergleichbar, auch im Unbeobachtbaren. Non-Compliance zerstört diese "
-    "Eigenschaft für die <i>Einnahme</i>, nicht für die <i>Zuweisung</i>. "
-    "Deshalb ist ITT der ehrliche Standard klinischer Studien, während "
-    "IV-Methoden den Einnahme-Effekt für die Complier zurückgewinnen.",
+    "Für die weitere AG",
+    "RCTs, DAGs, natürliche Experimente und Causal ML unterscheiden sich in ihren "
+    "Werkzeugen. Gemeinsam ist ihnen die Aufgabe, aus beobachteten Daten unter "
+    "expliziten Annahmen ein glaubwürdiges kontrafaktisches Vergleichsszenario "
+    "zu konstruieren.",
     typ="merke",
 )
+
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit:",
     [
         (
             "Wie plant man ein Experiment, <i>bevor</i> Daten existieren? "
@@ -355,10 +360,8 @@ gruppen_aufgabe(
             "Studie überhaupt etwas zeigen kann."
         ),
         (
-            "Was tun, wenn nicht alle mitmachen? Die Vertiefung oben stellt "
-            "ITT, Per-Protocol und IV nebeneinander. Welche der drei Größen "
-            "beantwortet welche Frage, und welche würdet ihr einer "
-            "Zulassungsbehörde vorlegen?"
+            "Was tun, wenn nicht alle mitmachen? "
+            "(ITT, Per-Protocol und IV) "
         ),
         (
             "Wie geht man mit mehreren Endpunkten um? Wer zwanzig Outcomes "
@@ -368,10 +371,9 @@ gruppen_aufgabe(
         ),
     ],
     hinweis=(
-        "Startpunkt: das CONSORT-Statement als Checkliste für "
+        "Startpunkt: Das CONSORT-Statement als Checkliste für "
         "RCT-Berichte, <code>statsmodels.stats.power</code> für "
-        "Fallzahlen, und ein echtes Studienprotokoll von "
-        "ClinicalTrials.gov zum Auseinandernehmen."
+        "Fallzahlen."
     ),
 )
 
@@ -385,17 +387,19 @@ st.markdown(
 """
 )
 
-st.markdown("## Wie geht es weiter?")
-weiter_quasi, weiter_bayes = st.columns(2)
-with weiter_quasi:
-    st.page_link(
-        "views/kausalitaet/quasi_experimente.py",
-        label="Kein Experiment möglich? Quasi-Experimente: DiD & RDD",
-        icon="📐",
-    )
-with weiter_bayes:
-    st.page_link(
-        "views/kausalitaet/bayes.py",
-        label="Oder: Bayesian Methods",
-        icon="🎲",
-    )
+# -------------------------------------------------------------- Ausblick
+st.markdown("## Nächster Schritt: Welche Annahmen tragen die Identifikation?")
+st.markdown(
+    """
+Wir haben gesehen, dass der Treatment-Assignment-Mechanismus entscheidend ist.
+In Beobachtungsdaten ist er selten zufällig. Kausale Modelle helfen dann, die
+notwendigen Annahmen explizit zu machen und zu prüfen, **welche Variablen einen
+kausalen Vergleich ermöglichen**.
+"""
+)
+
+st.page_link(
+    "views/kausalitaet/dags_confounding.py",
+    label="Weiter: Identifikation, Annahmen & Landkarte der AG",
+    icon="🧭",
+)
