@@ -16,14 +16,11 @@ st.markdown(
 Während der Akademie arbeitet ihr in Gruppen an eigenen Fragestellungen rund
 um Maschinelles Lernen und Kausalität. Jede Gruppe bekommt hier eine eigene
 Seite, die Galerie unten füllt sich im Lauf der Akademie.
+
+Aktuell befindet sich hier ein Beispielprojekt von den Dozenten.
 """
 )
 
-st.page_link(
-    "views/projekte/themen.py",
-    label="Welche Themen stehen zur Wahl? Zu den Themen der Gruppenarbeiten",
-    icon="🧭",
-)
 
 projekte = lade_projekte()
 seiten_map = st.session_state.get("projekt_seiten", {})
@@ -92,26 +89,25 @@ Zwei Vorlagen stehen bereit:
 """
     )
 
-st.markdown("## Wie eine Projektarbeit aufgebaut sein sollte")
-st.markdown(
-    """
-Egal ob Markdown oder Streamlit, inhaltlich erwarten wir dieselben sechs
-Abschnitte. Das Beispielprojekt zeigt sie an echten Daten:
+# st.markdown("## Wie eine Projektarbeit aufgebaut sein sollte")
+# st.markdown(
+#     """
+# Egal ob Markdown oder Streamlit, inhaltlich wäre eine sinnvolle Strukturierung:
 
-| Abschnitt | Was hineingehört |
-|---|---|
-| **1 Frage** | Was wollt ihr wissen, warum ist es interessant, warum ist es schwer? |
-| **2 Daten & EDA** | Woher die Daten, was steckt drin, was fehlt? |
-| **3 Naive Analyse** | Der einfachste Vergleich, und wo er in die Irre führt |
-| **4 Identifikation** | Warum darf man das kausal lesen? Welche Annahmen? |
-| **5 Ergebnis** | Effekt mit Unsicherheit, Heterogenität, auch Nullbefunde |
-| **6 Limitationen** | Was eure Analyse *nicht* zeigt |
+# | Abschnitt | Was hineingehört |
+# |---|---|
+# | **1 Frage** | Was wollt ihr wissen, warum ist es interessant, warum ist es schwer? |
+# | **2 Daten & EDA** | Woher die Daten, was steckt drin, was fehlt? |
+# | **3 Naive Analyse** | Der einfachste Vergleich, und wo er in die Irre führt |
+# | **4 Identifikation** | Warum darf man das kausal lesen? Welche Annahmen? |
+# | **5 Ergebnis** | Effekt mit Unsicherheit, Heterogenität, auch Nullbefunde |
+# | **6 Limitationen** | Was eure Analyse *nicht* zeigt |
 
-Der wichtigste Abschnitt ist **4**. Eine Zahl ausrechnen kann jedes
-Statistikpaket. Zu begründen, warum diese Zahl einen kausalen Effekt misst,
-ist die eigentliche Arbeit.
-"""
-)
+# Der wichtigste Abschnitt ist **4**. Eine Zahl ausrechnen kann jedes
+# Statistikpaket. Zu begründen, warum diese Zahl einen kausalen Effekt misst,
+# ist die eigentliche Arbeit.
+# """
+# )
 
 merkkasten(
     "Keine Sorge vor Fehlern",

@@ -8,18 +8,17 @@ from utils.theming import kapitel_kopf, merkkasten
 kapitel_kopf(
     "🧭",
     "Themen der Gruppenarbeiten",
-    "Neun Richtungen, die Kapitel dazu und die Fragen, die offen bleiben",
+    "Übersicht über die Themen, mit Beispielfragestellungen.",
 )
 
 st.markdown(
     """
 Während der Akademie bearbeitet ihr in Gruppen eines dieser Themen in Python.
 Zu jedem Thema findest du hier drei Angaben: den **Abstract**, die **Kapitel**
-dieser Website, die dich vorbereiten, und die **offenen Fragen**, also das,
-was die Kapitel bewusst nicht beantworten und wo eure Arbeit anfängt.
+dieser Website, die dich vorbereiten, und die **offenen Fragen**, die ihr
+als Ausgangspunkt für eure eigene App nutzen könnt.
 
-Die Kapitel liefern das Fundament und je eine Demo. Alles Weitere steht dort
-in aufklappbaren Vertiefungen oder gar nicht: Es ist euer Thema, nicht unseres.
+Die Kapitel liefern das Fundament und je eine Demo. Alles weitere liegt an euch!
 """
 )
 
@@ -93,11 +92,11 @@ THEMEN = [
             "Beobachtungsdaten."
         ),
         "fragen": [
-            "Das Kapitel setzt den DAG voraus. Lässt er sich aus den Daten selbst lernen (PC, GES, NOTEARS)?",
-            "Warum legen Daten den DAG nie vollständig fest? Stichwort Markov-Äquivalenzklasse.",
+            "Wie lassen sich DAGS aus Daten selbst lernen (PC-Algorithmus)?",
+            "Warum legen Daten den DAG nie vollständig fest (Markov-Äquivalenzklasse)?",
             "Was bleibt übrig, wenn ein wichtiger Confounder nie erhoben wurde?",
         ],
-        "startpunkt": "`causal-learn`, `dowhy`. Zuerst an simulierten Daten mit bekanntem DAG testen",
+        "startpunkt": "`causal-learn`, `dowhy`. Zuerst an simulierten Daten mit bekanntem DAG testen.",
         "links": [
             ("views/kausalitaet/dags_confounding.py", "DAGs & Confounding", "🕸️"),
             ("views/kausalitaet/korrelation.py", "Korrelation ≠ Kausalität", "🔀"),
@@ -133,10 +132,10 @@ THEMEN = [
         ),
         "fragen": [
             "Was passiert, wenn Regionen zu unterschiedlichen Zeitpunkten behandelt werden (staggered DiD)?",
-            "Wie prüft man Pre-Trends, ohne sich selbst zu betrügen?",
-            "Wie wählt man die RDD-Bandbreite datengetrieben, und wie testet man auf Manipulation am Cutoff?",
+            "Wie prüft man die Pre-Trends, ohne sich selbst zu betrügen?",
+            "Was passiert, wenn im RDD non-compliance in der Nähe des Cutoffs auftritt?",
         ],
-        "startpunkt": "`differences`, `linearmodels`, `rdrobust`. Am besten ein echter Politikwechsel mit Paneldaten",
+        "startpunkt": "`differences`, `linearmodels`, `rdrobust`.",
         "links": [
             ("views/kausalitaet/quasi_experimente.py", "Quasi-Experimente: DiD & RDD", "📐"),
             ("views/kausalitaet/potential_outcomes.py", "Potential Outcomes & RCTs", "⚖️"),
@@ -162,46 +161,6 @@ THEMEN = [
             ("views/kausalitaet/potential_outcomes.py", "Potential Outcomes & RCTs", "⚖️"),
         ],
     },
-    {
-        "emoji": "📚",
-        "titel": "Examples / Case Studies",
-        "abstract": (
-            "Angewandte, praxisnahe Replikation und kritische methodische "
-            "Analyse prominenter Paper im Bereich Causal Inference sowie die "
-            "Übertragung theoretischer Ansätze auf reale Datensätze."
-        ),
-        "fragen": [
-            "Sucht euch ein bekanntes Paper mit offenem Replikationspaket: Kommen dieselben Zahlen heraus?",
-            "Welche Annahme trägt das Ergebnis, und wie robust ist es, wenn ihr sie variiert?",
-            "Wo weicht das, was das Paper behauptet, von dem ab, was die Daten hergeben?",
-        ],
-        "startpunkt": "Harvard Dataverse, AEA Data & Code Repository, dazu das Beispielprojekt als Zielstruktur",
-        "links": [
-            ("views/kausalitaet/korrelation.py", "Korrelation ≠ Kausalität", "🔀"),
-            ("views/kausalitaet/quasi_experimente.py", "Quasi-Experimente: DiD & RDD", "📐"),
-            ("views/kausalitaet/potential_outcomes.py", "Potential Outcomes & RCTs", "⚖️"),
-        ],
-    },
-    {
-        "emoji": "📝",
-        "titel": "SEMs / Eigene Experimente & Surveys",
-        "abstract": (
-            "Formulierung von Strukturgleichungsmodellen (SEMs) zur "
-            "Evaluierung komplexer multivariater Zusammenhänge, kombiniert "
-            "mit dem praktischen Design, der Implementierung und der "
-            "Auswertung eigener Survey-Experimente."
-        ),
-        "fragen": [
-            "Wie misst man Vertrauen, Motivation oder Einstellung, also etwas nicht direkt Beobachtbares?",
-            "Wann ist ein SEM überhaupt identifiziert, und woran erkennt man es vorher?",
-            "Baut ein eigenes Survey-Experiment: Vignetten, Conjoint, Attention Checks.",
-        ],
-        "startpunkt": "`semopy` oder `lavaan`, ein Fragebogen-Tool, und vorab eine Power-Analyse",
-        "links": [
-            ("views/kausalitaet/sem_surveys.py", "SEMs & Survey Experiments", "📋"),
-            ("views/kausalitaet/dags_confounding.py", "DAGs & Confounding", "🕸️"),
-        ],
-    },
 ]
 
 for zeile_start in range(0, len(THEMEN), 2):
@@ -223,7 +182,7 @@ merkkasten(
     "Und dann?",
     "Sobald eure Gruppe loslegt, bekommt ihr eine eigene Seite auf dieser "
     "Website. Wie das geht, steht in der Projektübersicht. Dort liegt auch "
-    "das Beispielprojekt, das den erwarteten Aufbau einer Projektarbeit "
+    "das Beispielprojekt, das einen beispielhaften Aufbau einer Projektarbeit "
     "vollständig durchspielt.",
     typ="definition",
 )

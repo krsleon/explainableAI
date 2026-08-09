@@ -58,7 +58,7 @@ kausal_seiten = [
     st.Page("views/kausalitaet/quasi_experimente.py", title="Quasi-Experimente: DiD & RDD", icon="📐"),
     st.Page("views/kausalitaet/kausales_ml.py", title="Kausales Machine Learning", icon="🎯"),
     st.Page("views/kausalitaet/bayes.py", title="Bayesian Methods", icon="🎲"),
-    st.Page("views/kausalitaet/sem_surveys.py", title="SEMs & Survey Experiments", icon="📋"),
+    # st.Page("views/kausalitaet/sem_surveys.py", title="SEMs & Survey Experiments", icon="📋"),
 ]
 
 themen = st.Page("views/projekte/themen.py", title="Themen der Gruppenarbeiten", icon="🧭")
@@ -74,8 +74,8 @@ st.session_state["projekt_seiten"] = seiten_map
 navigation = st.navigation(
     {
         "": [start, ueber, ablaufplan, streamlit_intro, python_setup],
-        "Maschinelles Lernen": ml_seiten,
-        "Kausalität": kausal_seiten,
+        "Intro Maschinelles Lernen": ml_seiten,
+        "Intro Kausalität": kausal_seiten,
         "Gruppenprojekte": [themen, uebersicht, *seiten_map.values()],
         "Material": [referenzen],
     }

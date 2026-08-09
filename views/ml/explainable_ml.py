@@ -338,7 +338,7 @@ wisst ihr, was sie unter der Haube tun.
 """
 )
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit",
     [
         (
             "SHAP-Werte sind <b>keine</b> kausalen Effekte. Wo genau bricht "
