@@ -22,14 +22,14 @@ ablauf = [
     {"Datum": "19.08.", "Zeit": "09:00-10:00", "Programmpunkt": "Akademieeröffnung im Plenum"},
     {
         "Datum": "",
-        "Zeit": "10:15-12:30",
-        "Programmpunkt": "Arbeitsgruppeneröffnung und Vorstellungsrunde",
+        "Zeit": "10:15-11:15",
+        "Programmpunkt": "Arbeitsgruppeneröffnung, Motivation und Vorstellungsrunde",
     },
-    {"Datum": "", "Zeit": "", "Programmpunkt": "Setup: uv, VS Code und Streamlit"},
-    {"Datum": "20.08.", "Zeit": "09:00-10:00", "Programmpunkt": "Input: Einführung in ML"},
+    {"Datum": "", "Zeit": "11:30-12:30", "Programmpunkt": "Setup: uv, VS Code und Streamlit"},
+    {"Datum": "20.08.", "Zeit": "09:00", "Programmpunkt": "Input: Einführung in ML"},
     {
         "Datum": "",
-        "Zeit": "10:15-12:30",
+        "Zeit": "anschließend",
         "Programmpunkt": "Input: Einführung in Kausale Inferenz",
     },
     {"Datum": "21.08.", "Zeit": "09:00-10:00", "Programmpunkt": "Auftakt Gruppenarbeit"},
@@ -53,8 +53,8 @@ ablauf = [
         "Zeit": "09:00-10:00",
         "Programmpunkt": "Fazit, offene Fragen, Diskussion",
     },
-    {"Datum": "", "Zeit": "10:15-10:30", "Programmpunkt": "Feedback"},
-    {"Datum": "", "Zeit": "10:30-12:30", "Programmpunkt": "Vorbereitung bunter Abend"},
+    {"Datum": "", "Zeit": "anschließend", "Programmpunkt": "Feedback"},
+    {"Datum": "", "Zeit": "anschließend", "Programmpunkt": "Vorbereitung bunter Abend"},
 ]
 
 zeilen = []
