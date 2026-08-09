@@ -126,16 +126,16 @@ with spalte_streu:
     fig = go.Figure()
     fig.add_scatter(
         x=x, y=y, mode="markers", name="Tage",
-        marker=dict(
-            color=z, colorscale=[[0, "#D9E4F2"], [1, FARBEN["nacht"]]],
-            size=7, opacity=0.75,
-            colorbar=dict(title="Sonnenstunden Z", thickness=12),
-        ),
+        marker={
+            "color": z, "colorscale": [[0, "#D9E4F2"], [1, FARBEN["nacht"]]],
+            "size": 7, "opacity": 0.75,
+            "colorbar": {"title": "Sonnenstunden Z", "thickness": 12},
+        },
     )
     fig.add_scatter(
         x=raster, y=np.polyval(np.polyfit(x, y, 1), raster), mode="lines",
         name=f"Naive Regressionsgerade (Steigung {naiv:.2f})",
-        line=dict(color=FARBEN["sonne"], width=3),
+        line={"color": FARBEN["sonne"], "width": 3},
     )
     fig.update_layout(
         xaxis_title="Eisverkauf X", yaxis_title="Sonnenbrände Y", height=380,
@@ -190,86 +190,105 @@ st.markdown("## Demo: Das Simpson-Paradox")
 st.markdown(
     """
 Confounder können Zusammenhänge nicht nur vortäuschen, sondern im Vorzeichen
-**umkehren**. Ein klassisches Beispiel: In den aggregierten Daten einer
-Beobachtungsstudie geht mehr **Sport** mit *höherem* **Cholesterin** einher.
-Schlüssle die Daten nach **Altersgruppen** auf und vergleiche die Steigungen
-innerhalb der Gruppen mit dem Gesamttrend.
+**umkehren**. Beispiel: Wir regressieren **Gehalt** auf (monatliche)
+**Weiterbildungsstunden**. Innerhalb jeder Erfahrungsgruppe gilt: mehr
+Weiterbildung, höheres Gehalt. Aggregiert kann der Trend trotzdem negativ
+werden, wenn jüngere Beschäftigte mehr Kurse besuchen, aber weniger verdienen.
 """
 )
+st.latex(r"\text{Gehalt} = \beta_0 + \beta_1 \cdot \text{Weiterbildungsstunden}")
 
 
 @st.cache_data
+@st.cache_data
 def simpson_daten(seed: int = 7):
     rng = np.random.default_rng(seed)
+
     gruppen = {
-        "20–35 Jahre": (2.0, 195.0),
-        "40–55 Jahre": (5.0, 215.0),
-        "60–75 Jahre": (8.0, 235.0),
+        "0–3 Jahre Erfahrung": (10.0, 48.0),
+        "4–10 Jahre Erfahrung": (7.0, 56.0),
+        ">10 Jahre Erfahrung": (4.0, 64.0),
     }
+
     frames = []
-    for name, (sport_mitte, chol_mitte) in gruppen.items():
+
+    for name, (weiterbildung_mitte, gehalt_mitte) in gruppen.items():
         n = 60
-        sport = np.clip(rng.normal(sport_mitte, 1.2, n), 0, None)
-        # Innerhalb jeder Altersgruppe senkt Sport das Cholesterin.
-        chol = chol_mitte - 4.0 * (sport - sport_mitte) + rng.normal(0, 8, n)
-        frames.append((name, sport, chol))
+
+        # Deutlich mehr Überlappung zwischen den Erfahrungsgruppen.
+        weiterbildung = np.clip(
+            rng.normal(weiterbildung_mitte, 1.8, n),
+            0,
+            None,
+        )
+
+        # Innerhalb jeder Erfahrungsgruppe:
+        # mehr Weiterbildung -> höheres Gehalt.
+        gehalt = (
+            gehalt_mitte
+            + 1.4 * (weiterbildung - weiterbildung_mitte)
+            + rng.normal(0, 4.0, n)
+        )
+
+        frames.append((name, weiterbildung, gehalt))
+
     return frames
 
 
 frames = simpson_daten()
-alle_sport = np.concatenate([f[1] for f in frames])
-alle_chol = np.concatenate([f[2] for f in frames])
-gesamt_steigung = np.polyfit(alle_sport, alle_chol, 1)[0]
+alle_weiterbildung = np.concatenate([f[1] for f in frames])
+alle_gehalt = np.concatenate([f[2] for f in frames])
+gesamt_steigung = np.polyfit(alle_weiterbildung, alle_gehalt, 1)[0]
 
-aufschluesseln = st.toggle("Nach Altersgruppen aufschlüsseln")
+aufschluesseln = st.toggle("Nach Erfahrungsgruppen aufschlüsseln")
 
 fig_simpson = go.Figure()
 gruppen_farben = [FARBEN["gletscher"], FARBEN["sonne"], FARBEN["wiese"]]
 
 if not aufschluesseln:
     fig_simpson.add_scatter(
-        x=alle_sport, y=alle_chol, mode="markers", name="Alle Personen",
-        marker=dict(color=FARBEN["schiefer"], size=7, opacity=0.6),
+        x=alle_weiterbildung, y=alle_gehalt, mode="markers", name="Alle Personen",
+        marker={"color": FARBEN["schiefer"], "size": 7, "opacity": 0.6},
     )
-    raster = np.linspace(alle_sport.min(), alle_sport.max(), 50)
+    raster = np.linspace(alle_weiterbildung.min(), alle_weiterbildung.max(), 50)
     fig_simpson.add_scatter(
-        x=raster, y=np.polyval(np.polyfit(alle_sport, alle_chol, 1), raster),
+        x=raster, y=np.polyval(np.polyfit(alle_weiterbildung, alle_gehalt, 1), raster),
         mode="lines", name=f"Gesamttrend (Steigung {gesamt_steigung:+.1f})",
-        line=dict(color=FARBEN["beere"], width=4),
+        line={"color": FARBEN["beere"], "width": 4},
     )
 else:
-    for (name, sport, chol), farbe in zip(frames, gruppen_farben):
-        steigung = np.polyfit(sport, chol, 1)[0]
+    for (name, weiterbildung, gehalt), farbe in zip(frames, gruppen_farben):
+        steigung = np.polyfit(weiterbildung, gehalt, 1)[0]
         fig_simpson.add_scatter(
-            x=sport, y=chol, mode="markers", name=f"{name}",
-            marker=dict(color=farbe, size=7, opacity=0.7),
+            x=weiterbildung, y=gehalt, mode="markers", name=f"{name}",
+            marker={"color": farbe, "size": 7, "opacity": 0.7},
         )
-        raster = np.linspace(sport.min(), sport.max(), 20)
+        raster = np.linspace(weiterbildung.min(), weiterbildung.max(), 20)
         fig_simpson.add_scatter(
-            x=raster, y=np.polyval(np.polyfit(sport, chol, 1), raster),
+            x=raster, y=np.polyval(np.polyfit(weiterbildung, gehalt, 1), raster),
             mode="lines", name=f"{name}: Steigung {steigung:+.1f}",
-            line=dict(color=farbe, width=3),
+            line={"color": farbe, "width": 3},
         )
 
 fig_simpson.update_layout(
-    xaxis_title="Sport (Stunden pro Woche)",
-    yaxis_title="Cholesterin (mg/dl)",
+    xaxis_title="Weiterbildung (Stunden)",
+    yaxis_title="Gehalt (Tsd. Euro)",
     height=440,
 )
 st.plotly_chart(fig_simpson, use_container_width=True)
 
 if aufschluesseln:
     st.success(
-        "**Auflösung:** Innerhalb *jeder* Altersgruppe senkt Sport das "
-        "Cholesterin (negative Steigungen). Der positive Gesamttrend entsteht "
-        "nur, weil Ältere sowohl mehr Sport treiben als auch höheres "
-        "Cholesterin haben. Das **Alter** ist der Confounder."
+        "**Auflösung:** Innerhalb *jeder* Erfahrungsgruppe ist der "
+        "Weiterbildungs-Koeffizient positiv. Der negative Gesamttrend entsteht "
+        "nur, weil Berufseinsteiger mehr Kurse besuchen, aber erfahrene "
+        "Beschäftigte höhere Gehälter haben. **Erfahrung** ist der Confounder."
     )
 else:
     st.info(
-        f"Der Gesamttrend hat die Steigung **{gesamt_steigung:+.1f}**, mehr "
-        "Sport geht also scheinbar mit höherem Cholesterin einher. Aktiviere "
-        "die Aufschlüsselung, bevor du dieses Ergebnis interpretierst."
+        f"Der Gesamttrend hat die Steigung **{gesamt_steigung:+.1f}**: mehr "
+        "Weiterbildung sieht aggregiert scheinbar nach niedrigerem Gehalt aus. "
+        "Aktiviere die Aufschlüsselung, bevor du dieses Ergebnis interpretierst."
     )
 
 merkkasten(
@@ -281,7 +300,7 @@ merkkasten(
     typ="merke",
 )
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit",
     [
         (
             "Das Thema <b>Examples und Case Studies</b> beginnt hier: Sucht "
