@@ -285,7 +285,7 @@ merkkasten(
     typ="definition",
 )
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit",
     [
         (
             "Was passiert, wenn Regionen zu <b>unterschiedlichen "
@@ -301,11 +301,12 @@ gruppen_aufgabe(
             "Verletzung, aber er belegt auch keine Parallelität. Wie "
             "unterscheidet man beides?"
         ),
-        (
-            "Wie wählt man die RDD-Bandbreite datengetrieben, statt sie wie in "
-            "der Vertiefung per Schieberegler zu raten? Und wie testet man, ob "
-            "Menschen ihre Position am Cutoff manipuliert haben?"
-        ),
+    (
+        "Was passiert, wenn der Cutoff die Behandlung nicht perfekt bestimmt? "
+        "Wie lässt sich "
+        "der Sprung am Cutoff als Instrument nutzen, und welchen kausalen Effekt "
+        "identifiziert das Fuzzy RDD?"
+    )
     ],
     hinweis=(
         "Startpunkt: <code>differences</code> und "
