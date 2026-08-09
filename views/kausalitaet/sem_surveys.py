@@ -235,7 +235,7 @@ merkkasten(
     typ="merke",
 )
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit",
     [
         (
             "Wie misst man etwas, das man nicht direkt beobachten kann, also "
