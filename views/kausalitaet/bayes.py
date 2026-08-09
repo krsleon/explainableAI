@@ -561,7 +561,7 @@ merkkasten(
     typ="merke",
 )
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit",
     [
         (
             "Wie sehr hängt euer Ergebnis am Prior? Eine ehrliche "
