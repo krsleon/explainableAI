@@ -31,15 +31,15 @@ st.caption(
     "Beispielprojekt des Dozenten-Teams · Daten: Project STAR, Tennessee 1985–1989"
 )
 
-st.markdown(
-    """
-Dieses Projekt ist als **Vorlage** gedacht. Es zeigt an echten Daten, wie eine
-Projektarbeit aufgebaut sein kann: von der Frage über die Identifikation bis
-zu den Grenzen der Aussage. Die sechs Reiter sind die sechs Abschnitte, die
-wir auch von euch sehen wollen.
-"""
+merkkasten(
+    "Dieses Projekt ist ein ausführliches Beispiel",
+    "Dieses Projekt ist als <b>Beispiel</b> gedacht, kann aber auch als <b>Vorlage</b> dienen. "
+    "Es zeigt an echten Daten, wie eine Projektarbeit aufgebaut sein kann: von der Frage "
+    "über die Identifikation bis zu den Grenzen der Aussage. "
+    "<b>Wie ausführlich euer Projekt ist, entscheidet ihr! Es geht um Spaß am Forschen und "
+    "interaktives Arbeiten.</b>",
+    typ="merke",
 )
-
 daten = analyse.lade_daten()
 
 tab_frage, tab_daten, tab_naiv, tab_ident, tab_ergebnis, tab_grenzen = st.tabs(
