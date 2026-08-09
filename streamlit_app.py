@@ -53,8 +53,8 @@ ml_seiten = [
 
 kausal_seiten = [
     st.Page("views/kausalitaet/korrelation.py", title="Korrelation ≠ Kausalität", icon="🔀"),
-    st.Page("views/kausalitaet/dags_confounding.py", title="DAGs & Confounding", icon="🕸️"),
     st.Page("views/kausalitaet/potential_outcomes.py", title="Potential Outcomes & RCTs", icon="⚖️"),
+    st.Page("views/kausalitaet/dags_confounding.py", title="DAGs & Confounding", icon="🕸️"),
     st.Page("views/kausalitaet/quasi_experimente.py", title="Quasi-Experimente: DiD & RDD", icon="📐"),
     st.Page("views/kausalitaet/kausales_ml.py", title="Kausales Machine Learning", icon="🎯"),
     st.Page("views/kausalitaet/bayes.py", title="Bayesian Methods", icon="🎲"),

@@ -16,16 +16,14 @@ st.markdown(
     """
 Die Arbeitsgruppe **„Eine Einführung in Maschinelles Lernen und Kausalität“**
 ist Teil der Sommerakademie Leysin der Studienstiftung des deutschen Volkes.
-Sie verbindet Statistik, Informatik und Ökonomie zu einer Frage, die
+Wir verbinden Statistik, Informatik und Ökonomie zu einer Frage, die
 datengetriebene Forschung überall beschäftigt: **Wann dürfen wir aus Daten auf
 Ursache und Wirkung schließen?**
 
 KI-Systeme, die Korrelationen mit kausalen Zusammenhängen verwechseln, können
-zu schlechten, teils schädlichen Entscheidungen führen. Wir untersuchen,
+zu schlechten, oder sogar schädlichen Entscheidungen führen. Wir untersuchen,
 wie solche Verzerrungen entstehen, wie man sie erkennt und mit welchen
-Strategien man kausale Parameter aus Daten schätzt. Dazu gehören auch aktuelle
-Themen wie die Frage, wie es bei **Large Language Models** um kausales und
-logisches Denken steht.
+Strategien man kausale Parameter aus Daten schätzt.
 """
 )
 

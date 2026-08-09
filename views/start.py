@@ -29,9 +29,11 @@ Moderne KI-Systeme sind erstaunlich gut darin, **Muster zu erkennen und
 vorherzusagen**, aber Muster sind nicht dasselbe wie Ursachen. Wer aus Daten
 Entscheidungen ableiten will („Hilft dieses Medikament?“, „Bringt diese
 Werbekampagne etwas?“), braucht mehr als Korrelationen: eine Antwort auf die
-Frage nach dem **Warum**. Alle Kapitel enthalten interaktive Simulationen:
-Parameter verändern, Stichproben neu ziehen und die Konsequenzen unmittelbar
-beobachten.
+Frage nach dem **Warum**. Auf dieser Website wollen wir zusammen mit den
+Teilnehmenden der Arbeitsgruppe interaktiv das Themengebiet an der Schnittstelle
+von Maschinellem Lernen und Kausaler Inferenz erarbeiten.
+Alle Kapitel enthalten interaktive Simulationen: So können Parameter verändert,
+Stichproben neu gezogen und die Konsequenzen unmittelbar beobachtet werden.
 """
 )
 
