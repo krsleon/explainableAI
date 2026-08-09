@@ -235,7 +235,7 @@ with vertiefung("LLMs als Werkzeug der Kausalanalyse"):
     """
     )
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit",
     [
         (
             "Kann ein LLM einen brauchbaren DAG vorschlagen? Das lässt sich "

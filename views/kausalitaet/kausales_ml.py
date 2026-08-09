@@ -221,7 +221,7 @@ merkkasten(
     typ="merke",
 )
 gruppen_aufgabe(
-    "Was eure Gruppe hier herausfindet",
+    "Ideen für die Gruppenarbeit",
     [
         (
             "Für <i>wen</i> wirkt eine Maßnahme? Der ATE ist ein Durchschnitt "
