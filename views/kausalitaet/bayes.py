@@ -603,12 +603,12 @@ st.markdown(
 
 st.markdown("## Wie geht es weiter?")
 weiter_sem, weiter_po = st.columns(2)
-with weiter_sem:
-    st.page_link(
-        "views/kausalitaet/sem_surveys.py",
-        label="Weiter: SEMs & Survey Experiments",
-        icon="📋",
-    )
+# with weiter_sem:
+#     st.page_link(
+#         "views/kausalitaet/sem_surveys.py",
+#         label="Weiter: SEMs & Survey Experiments",
+#         icon="📋",
+#     )
 with weiter_po:
     st.page_link(
         "views/kausalitaet/potential_outcomes.py",
