@@ -74,8 +74,8 @@ st.session_state["projekt_seiten"] = seiten_map
 navigation = st.navigation(
     {
         "": [start, ueber, ablaufplan, streamlit_intro, python_setup],
-        "Maschinelles Lernen": ml_seiten,
-        "Kausalität": kausal_seiten,
+        "Intro Maschinelles Lernen": ml_seiten,
+        "Intro Kausalität": kausal_seiten,
         "Gruppenprojekte": [themen, uebersicht, *seiten_map.values()],
         "Material": [referenzen],
     }
