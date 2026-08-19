@@ -23,7 +23,7 @@ ablauf = [
     {
         "Datum": "",
         "Zeit": "10:15-11:15",
-        "Programmpunkt": "Arbeitsgruppeneröffnung, Motivation und Vorstellungsrunde",
+        "Programmpunkt": '<a href="slides/eroeffnung.pdf" target="_blank">Arbeitsgruppeneröffnung, Motivation und Vorstellungsrunde</a>',
     },
     {"Datum": "", "Zeit": "11:30-12:30", "Programmpunkt": "Setup: uv, VS Code und Streamlit"},
     {"Datum": "20.08.", "Zeit": "09:00", "Programmpunkt": "Input: Einführung in ML"},
@@ -34,10 +34,10 @@ ablauf = [
     },
     {"Datum": "21.08.", "Zeit": "09:00-10:00", "Programmpunkt": "Auftakt Gruppenarbeit"},
     {"Datum": "", "Zeit": "10:15-12:30", "Programmpunkt": "Gruppenarbeit"},
-    {"Datum": "22.08.", "Zeit": "09:00-10:00", "Programmpunkt": "Gruppenarbeit"},
+    {"Datum": "22.08.", "Zeit": "", "Programmpunkt": "frei"},
+    {"Datum": "23.08.", "Zeit": "09:00-10:00", "Programmpunkt": "Gruppenarbeit"},
     {"Datum": "", "Zeit": "10:15-11:30", "Programmpunkt": "Gruppenarbeit"},
     {"Datum": "", "Zeit": "11:30-12:30", "Programmpunkt": "Gruppenarbeit"},
-    {"Datum": "23.08.", "Zeit": "", "Programmpunkt": "frei"},
     {"Datum": "24.08.", "Zeit": "09:00-10:00", "Programmpunkt": "Präsentation Gruppe RCT"},
     {
         "Datum": "",
