@@ -43,6 +43,81 @@ else:
                 if seite is not None:
                     st.page_link(seite, label="Zur Projektseite", icon="▶️")
 
+st.markdown("## Was soll am Ende entstehen?")
+
+st.markdown(
+    """
+Ziel ist **nicht**, euer gesamtes Themengebiet abzudecken. Wählt innerhalb
+eures Themas eine **präzise wissenschaftliche Frage** und untersucht sie anhand
+eines geeigneten Beispiels, Datensatzes, Experiments oder einer Simulation.
+
+Eure Streamlit-App soll dabei nicht bloß Ergebnisse präsentieren. Sie soll eine
+zentrale methodische Idee, Annahme oder Grenze eures Themas **interaktiv
+untersuchbar** machen.
+"""
+)
+
+st.markdown("### Eine sinnvolle Struktur")
+
+st.markdown(
+    """
+| Baustein | Was dazu gehört |
+|---|---|
+| **1. Frage & Motivation** | eine präzise Forschungsfrage |
+| **2. Konzept & Annahmen** | die zentrale Idee und was gelten muss, damit eine Aussage trägt |
+| **3. Setup** | Daten, Replikation, Benchmark, eigenes Experiment oder Simulation |
+| **4. Interaktive Analyse** | eine Variation, die etwas zum Vorschein bringt |
+| **5. Findings & Grenzen** | eine Erkenntnis und ihre Limitationen |
+"""
+)
+
+merkkasten(
+    "Wissenschaftliche Aussage vor technischer Umsetzung",
+    "Eine Methode auszuführen oder eine Zahl zu berechnen ist nicht das Hauptziel. "
+    "Entscheidend ist, dass ihr begründen könnt, <b>welche wissenschaftliche "
+    "Aussage eure Analyse erlaubt</b>.",
+    typ="definition",
+)
+
+st.markdown("### Was die Streamlit-App leisten soll")
+
+st.markdown(
+    """
+Die App sollte mindestens **eine wissenschaftlich relevante Variation**
+ermöglichen. Beispielsweise könnt ihr
+
+- eine Annahme oder einen Parameter verändern,
+- verschiedene Modelle oder Auswertungen vergleichen,
+- eine Datenstruktur oder Stichprobengröße variieren,
+- einen Prior, Cutoff oder Prompt verändern,
+- oder gezielt einen Fall erzeugen, in dem die Methode scheitert.
+
+**Leitfrage:** Was können andere durch die Interaktion verstehen, was auf einer
+statischen Folie weniger gut sichtbar wäre?
+
+Eine kleine, präzise App ist dabei besser als ein großes Dashboard ohne klare
+wissenschaftliche Aussage.
+"""
+)
+
+st.markdown("### Beispielhafter Arbeitsplan für die vier Projektblöcke")
+
+st.markdown(
+    """
+| Block | Tag | Ziel am Ende |
+|---|---|---|
+| **Scope & Design** | Freitag morgens | Frage, Konzept, Setup |
+| **Analyse** | Freitag vormittags | Kernanalyse, erste Visualisierung |
+| **Streamlit & Story** | Sonntag morgens | Interaktion, Erklärung, Findings  |
+| **Finalisierung** | Sonntag vormittags | Prototyp der App |
+"""
+)
+
+st.info(
+    "**Wichtig:** Ihr müsst nicht alle offenen Fragen eures Themas bearbeiten. "
+    "Eine gut untersuchte Frage ist besser als drei nur angerissene."
+)
+
 st.markdown("## So kommt euer Projekt auf die Website")
 
 with st.expander("Weg 1 (Standard): Markdown-Datei, kein Streamlit-Wissen nötig"):
@@ -89,82 +164,6 @@ Zwei Vorlagen stehen bereit:
 """
     )
 
-st.markdown("## Was soll am Ende entstehen?")
-
-st.markdown(
-    """
-Ziel ist **nicht**, euer gesamtes Themengebiet abzudecken. Wählt innerhalb
-eures Themas eine **präzise wissenschaftliche Frage** und untersucht sie anhand
-eines geeigneten Beispiels, Datensatzes, Experiments oder einer Simulation.
-
-Eure Streamlit-App soll dabei nicht bloß Ergebnisse präsentieren. Sie soll eine
-zentrale methodische Idee, Annahme oder Grenze eures Themas **interaktiv
-untersuchbar** machen.
-"""
-)
-
-st.markdown("### Eine sinnvolle Struktur")
-
-st.markdown(
-    """
-| Abschnitt | Leitfrage |
-|---|---|
-| **1 Frage & Motivation** | Was genau wollt ihr wissen? Warum ist die Frage interessant und nicht trivial? |
-| **2 Konzept / Methode** | Welche zentrale methodische Idee braucht man, um die Frage zu bearbeiten? |
-| **3 Annahmen & Gültigkeit** | Was muss gelten, damit eure Schlussfolgerung trägt? Bei klassischen kausalen Analysen: Was identifiziert euren Effekt? |
-| **4 Daten / Experiment / Simulation** | Woran untersucht ihr die Frage und warum eignet sich dieses Setup? |
-| **5 Interaktive Analyse** | Was können Nutzer:innen verändern und was lässt sich dadurch erkennen? |
-| **6 Findings** | Was habt ihr tatsächlich herausgefunden? |
-| **7 Grenzen & offene Fragen** | Was zeigt eure Analyse nicht? Welche Annahme oder Designentscheidung ist besonders kritisch? |
-"""
-)
-
-merkkasten(
-    "Wissenschaftliche Aussage vor technischer Umsetzung",
-    "Eine Methode auszuführen oder eine Zahl zu berechnen ist nicht das Hauptziel. "
-    "Entscheidend ist, dass ihr begründen könnt, <b>welche wissenschaftliche "
-    "Aussage eure Analyse erlaubt – und welche nicht</b>.",
-    typ="definition",
-)
-
-st.markdown("### Was die Streamlit-App leisten soll")
-
-st.markdown(
-    """
-Die App sollte mindestens **eine wissenschaftlich relevante Variation**
-ermöglichen. Beispielsweise könnt ihr
-
-- eine Annahme oder einen Parameter verändern,
-- verschiedene Modelle oder Auswertungen vergleichen,
-- eine Datenstruktur oder Stichprobengröße variieren,
-- einen Prior, Cutoff oder Prompt verändern,
-- oder gezielt einen Fall erzeugen, in dem die Methode scheitert.
-
-**Leitfrage:** Was können andere durch die Interaktion verstehen, was auf einer
-statischen Folie weniger gut sichtbar wäre?
-
-Eine kleine, präzise App ist dabei besser als ein großes Dashboard ohne klare
-wissenschaftliche Aussage.
-"""
-)
-
-st.markdown("### Beispielhafter Arbeitsplan für die vier Projektblöcke")
-
-st.markdown(
-    """
-| Block | Ziel am Ende |
-|---|---|
-| **1 · Scope & Design** (21.8.) | Forschungsfrage, Konzept, Daten/Simulation, zentrale Annahme und App-Skizze stehen fest. |
-| **2 · Analyse** (21.8.) | Die zentrale Analyse funktioniert und eine erste Visualisierung existiert. |
-| **3 · Streamlit & Story** (22.8.) | Interaktion, wissenschaftliche Erklärung, Findings und Limitationen sind integriert. |
-| **4 · Finalisierung** (22.8.) | App und Präsentation sind fertig; zentrale Aussage und Grenzen wurden getestet. |
-"""
-)
-
-st.info(
-    "**Wichtig:** Ihr müsst nicht alle offenen Fragen eures Themas bearbeiten. "
-    "Eine gut untersuchte Frage ist besser als drei nur angerissene."
-)
 
 merkkasten(
     "Keine Sorge vor Fehlern",
