@@ -30,7 +30,7 @@ merkkasten(
     typ="merke",
 )
 
-tab_frage, tab_daten, tab_naiv, tab_ident, tab_ergebnis, tab_grenzen = st.tabs(
+tab_intro, tab_daten, tab_blackbox, tab_lime, tab_shap, tab_ausblick = st.tabs(
     [
         "1 · Einleitung",
         "2 · Daten: Palmer Penguins",
@@ -40,3 +40,19 @@ tab_frage, tab_daten, tab_naiv, tab_ident, tab_ergebnis, tab_grenzen = st.tabs(
         "6 · Ausblick: Andere Möglichkeiten",
     ]
 )
+
+#============================================================= Daten
+with tab_daten:
+    st.markdown("## 2 · Daten: Palmer Penguins")
+    st.caption(
+        "Die Daten stammen aus dem Datensatz 'Palmer Penguins' von Allison Horst, 2014. "
+        "Er enthält Informationen zu 344 Pinguinen von drei Arten (Adelie, Chinstrap, Gentoo) "
+        "und vier Inseln (Biscoe, Dream, Torgersen, und Palmer)."
+    )
+    st.markdown(
+        "Die Daten enthalten die folgenden Spalten: `species`, `island`, `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`, `sex`."
+    )
+    st.markdown(
+        "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen."
+    )
+    
