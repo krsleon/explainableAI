@@ -9,6 +9,7 @@ import os
 import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
+import pandas as pd
 
 # Der Projektordner liegt nicht automatisch im Suchpfad, weil Streamlit die
 # Seite aus dem Hauptverzeichnis heraus startet. Diese drei Zeilen braucht
@@ -19,6 +20,9 @@ if str(ORDNER) not in sys.path:
 
 import analyse  # noqa: E402  (erst nach dem sys.path-Eintrag importierbar)
 from utils.theming import FARBEN, merkkasten
+
+data = analyse.load_data()
+model, X_test, y_test = analyse.train_blackbox(data, report=False)
 
 st.markdown("# Explainable AI: Wie können wir Black-Box Modelle verstehen?")
 st.caption(
@@ -67,7 +71,6 @@ with tab_intro:
 
 #============================================================= Daten
 with tab_daten:
-    data = analyse.load_data()
     st.markdown("## 2 · Daten: Palmer Penguins")
     st.caption(
         "Die Daten stammen aus dem Datensatz 'Palmer Penguins' von Allison Horst, 2014. "
@@ -168,11 +171,29 @@ with tab_lime:
         "Anschließend wird ein einfaches Modell (z.B. lineares Modell, Decision Tree) auf diesen Daten trainiert, um die Vorhersage des Black-Box-Modells zu erklären."
         "Es handelt sich um eine lokale Methode, da eine Erklärung nur für eine einzelne Vorhersage/Instanz - in unserem Beispiel für einen Pinguin - erzeugt wird, und nicht für das gesamte Modell."
     )
-    #instance_idx = st.selectbox(
-    #"Penguin to explain",
-    #options=range(len(X_test)),
-    #index=7
-    #)
+    instance_idx = st.selectbox(
+    "Penguin to explain",
+    options=range(len(X_test)),
+    # von jeder Art drei zur Auswahl geben.
+    index=7
+    )
+    instance_to_explain = X_test.iloc[instance_idx].to_numpy()
+
+    actual_class = y_test.iloc[instance_idx]
+
+    predicted_class = model.predict(
+        instance_to_explain.reshape(1, -1)
+    )[0]
+
+    st.write(f"**Actual species:** {actual_class}")
+    st.write(f"**Predicted species:** {predicted_class}")
+    st.markdown("Feature values of the selected instance:")
+    st.dataframe(
+    X_test.iloc[[instance_idx]],
+    hide_index=True,
+    use_container_width=True
+    )
+    st.markdown("### Kernel-dependence of LIME explanations")
     kernel_width = st.slider(
         "Kernel width",
         min_value=0.1,
@@ -180,6 +201,60 @@ with tab_lime:
         value=1.0,
         step=0.1,
     )
+    explainer = analyse.create_lime_explainer(model, data, kernel_width)
+    explanation = analyse.explain_instance(explainer, model, instance_to_explain)
+    lime_values = explanation.as_list()
+    
+    # Convert LIME output into a DataFrame
+    lime_df = pd.DataFrame(
+        lime_values,
+        columns=["Feature", "Contribution"]
+    )
+
+    # Sort so the strongest contributions appear at the top
+    lime_df = lime_df.sort_values(
+        "Contribution",
+        ascending=True
+    )
+
+    fig = px.bar(
+        lime_df,
+        x="Contribution",
+        y="Feature",
+        orientation="h",
+        title=f"LIME explanation — {predicted_class}",
+        labels={
+            "Contribution": "Contribution to prediction",
+            "Feature": "Feature"
+        }
+    )
+
+    # Add vertical line at zero
+    fig.add_vline(
+        x=0,
+        line_width=2
+    )
+
+    fig.update_layout(
+        height=400,
+        showlegend=False
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+    
+    fig.update_layout(
+    title=(
+        f"LIME explanation for {predicted_class}"
+        f"<br><sup>Kernel width = {kernel_width}</sup>"
+    ),
+    height=400,
+    showlegend=False
+    )
+    
+    
     st.markdown("## Weiterführende Literatur")
     st.markdown(
     "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier<b>, Ribeiro et al., 2016."
