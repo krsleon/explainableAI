@@ -164,95 +164,95 @@ with tab_lime:
     
     st.markdown("### Mathematische Grundlagen von LIME")
 
-st.markdown(
-    r"""
-    Für eine einzelne Instanz $x$ versucht LIME, das Verhalten des komplexen
-    Black-Box-Modells $f$ in einer lokalen Umgebung durch ein einfaches,
-    interpretierbares Modell $g$ zu approximieren. Für unsere Anwendung ist
-    $f$ der Random Forest und $x$ ein einzelner Pinguin.
-
-    Als einfaches Erklärungsmodell kann beispielsweise ein lineares Modell
-    verwendet werden:
-    """
-)
-
-st.latex(
-    r"""
-    g(x') = \beta_0 + \sum_{j=1}^{p} \beta_j x'_j .
-    """
-)
-
-st.markdown(
-    r"""
-    Dabei beschreibt $x'$ die Merkmale einer (möglicherweise perturbierten)
-    Instanz und $\beta_j$ gibt an, welchen lokalen Einfluss das Merkmal
-    $j$ auf die Vorhersage des Surrogatmodells hat. Ein großer Betrag
-    $|\beta_j|$ bedeutet somit einen starken lokalen Einfluss. Das Vorzeichen
-    gibt die Richtung des Einflusses an: Ein positiver Koeffizient unterstützt
-    die betrachtete Klasse, ein negativer Koeffizient spricht gegen sie.
-
-    Wichtig ist dabei, dass diese Koeffizienten <b>keine globalen
-    Feature-Importances des Random Forests</b> sind. Sie beschreiben nur,
-    wie das vereinfachte Modell das Verhalten des Random Forests in der
-    Umgebung der ausgewählten Instanz approximiert.
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    r"""
-    Um die lokale Umgebung zu erzeugen, verändert LIME die Merkmale der
-    ursprünglichen Instanz und lässt das Black-Box-Modell die erzeugten
-    Datenpunkte klassifizieren. Datenpunkte, die näher an der ursprünglichen
-    Instanz liegen, sollen dabei stärker zur lokalen Erklärung beitragen.
-    """
-)
-
-st.markdown("#### Kernel und Kernel-Breite")
-
-st.markdown(
-    r"""
-    Die Nähe eines perturbierten Datenpunkts $x'$ zur ursprünglichen Instanz
-    $x$ wird durch einen Kernel gewichtet. Vereinfacht kann man sich die
-    Gewichtsfunktion als
-    """
-)
-
-st.latex(
-    r"""
-    \pi_x(x') =
-    \exp\left(
-    -\frac{D(x,x')^2}{\sigma^2}
-    \right)
-    """
-)
-
-st.markdown(
-    r"""
-    vorstellen. Hier bezeichnet $D(x,x')$ einen Distanzmaß zwischen den
-    beiden Instanzen und $\sigma$ die <b>Kernel-Breite</b>
-    (<i>kernel width</i>).
-
-    Die Kernel-Breite bestimmt damit, wie groß die lokale Umgebung ist:
-    """
-)
-
-st.markdown(
-    r"""
-    - **Kleine Kernel-Breite:** Nur Datenpunkte, die sehr nahe an der
-      ursprünglichen Instanz liegen, erhalten ein hohes Gewicht.
-      Die Erklärung ist dadurch stärker lokalisiert.
-    - **Große Kernel-Breite:** Auch weiter entfernte Datenpunkte erhalten
-      noch ein relevantes Gewicht. Die Erklärung berücksichtigt dadurch
-      einen größeren Bereich des Datenraums.
-
-    Die Wahl der Kernel-Breite beeinflusst daher direkt die resultierende
-    Erklärung. Es gibt nicht notwendigerweise eine einzige, eindeutig
-    "richtige" lokale Erklärung.
-    """,
-    unsafe_allow_html=True
-)
+    st.markdown(
+        r"""
+        Für eine einzelne Instanz $x$ versucht LIME, das Verhalten des komplexen
+        Black-Box-Modells $f$ in einer lokalen Umgebung durch ein einfaches,
+        interpretierbares Modell $g$ zu approximieren. Für unsere Anwendung ist
+        $f$ der Random Forest und $x$ ein einzelner Pinguin.
     
+        Als einfaches Erklärungsmodell kann beispielsweise ein lineares Modell
+        verwendet werden:
+        """
+    )
+    
+    st.latex(
+        r"""
+        g(x') = \beta_0 + \sum_{j=1}^{p} \beta_j x'_j .
+        """
+    )
+    
+    st.markdown(
+        r"""
+        Dabei beschreibt $x'$ die Merkmale einer (möglicherweise perturbierten)
+        Instanz und $\beta_j$ gibt an, welchen lokalen Einfluss das Merkmal
+        $j$ auf die Vorhersage des Surrogatmodells hat. Ein großer Betrag
+        $|\beta_j|$ bedeutet somit einen starken lokalen Einfluss. Das Vorzeichen
+        gibt die Richtung des Einflusses an: Ein positiver Koeffizient unterstützt
+        die betrachtete Klasse, ein negativer Koeffizient spricht gegen sie.
+    
+        Wichtig ist dabei, dass diese Koeffizienten <b>keine globalen
+        Feature-Importances des Random Forests</b> sind. Sie beschreiben nur,
+        wie das vereinfachte Modell das Verhalten des Random Forests in der
+        Umgebung der ausgewählten Instanz approximiert.
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        r"""
+        Um die lokale Umgebung zu erzeugen, verändert LIME die Merkmale der
+        ursprünglichen Instanz und lässt das Black-Box-Modell die erzeugten
+        Datenpunkte klassifizieren. Datenpunkte, die näher an der ursprünglichen
+        Instanz liegen, sollen dabei stärker zur lokalen Erklärung beitragen.
+        """
+    )
+    
+    st.markdown("#### Kernel und Kernel-Breite")
+    
+    st.markdown(
+        r"""
+        Die Nähe eines perturbierten Datenpunkts $x'$ zur ursprünglichen Instanz
+        $x$ wird durch einen Kernel gewichtet. Vereinfacht kann man sich die
+        Gewichtsfunktion als
+        """
+    )
+    
+    st.latex(
+        r"""
+        \pi_x(x') =
+        \exp\left(
+        -\frac{D(x,x')^2}{\sigma^2}
+        \right)
+        """
+    )
+    
+    st.markdown(
+        r"""
+        vorstellen. Hier bezeichnet $D(x,x')$ einen Distanzmaß zwischen den
+        beiden Instanzen und $\sigma$ die <b>Kernel-Breite</b>
+        (<i>kernel width</i>).
+    
+        Die Kernel-Breite bestimmt damit, wie groß die lokale Umgebung ist:
+        """
+    )
+    
+    st.markdown(
+        r"""
+        - **Kleine Kernel-Breite:** Nur Datenpunkte, die sehr nahe an der
+          ursprünglichen Instanz liegen, erhalten ein hohes Gewicht.
+          Die Erklärung ist dadurch stärker lokalisiert.
+        - **Große Kernel-Breite:** Auch weiter entfernte Datenpunkte erhalten
+          noch ein relevantes Gewicht. Die Erklärung berücksichtigt dadurch
+          einen größeren Bereich des Datenraums.
+    
+        Die Wahl der Kernel-Breite beeinflusst daher direkt die resultierende
+        Erklärung. Es gibt nicht notwendigerweise eine einzige, eindeutig
+        "richtige" lokale Erklärung.
+        """,
+        unsafe_allow_html=True
+    )
+        
     if "lime_instance_idx" not in st.session_state:
         st.session_state["lime_instance_idx"] = 7
 
@@ -378,50 +378,50 @@ st.markdown(
     st.markdown("### Stärken und Schwächen von LIME")
 
     col1, col2 = st.columns(2)
-    
+
     with col1:
         st.success(
             """
             **✓ Stärken**
-    
+
             - **Modellunabhängig:** LIME benötigt keinen direkten Zugriff auf
               die interne Struktur des Black-Box-Modells.
-    
+
             - **Lokale Erklärungen:** Es erklärt konkrete einzelne
               Vorhersagen und kann dadurch sehr detaillierte Einzelfälle
               untersuchen.
-    
+
             - **Intuitiv:** Die Beiträge einzelner Merkmale können als
               positive oder negative Gewichte dargestellt werden.
-    
+
             - **Vielseitig:** Das Grundprinzip kann auf unterschiedliche
               Datentypen und Modelle angewendet werden.
-    
+
             - **Einfach visualisierbar:** Die lokalen Feature-Beiträge lassen
               sich beispielsweise als Balkendiagramm darstellen.
             """
         )
-    
+
     with col2:
         st.warning(
             """
             **⚠ Schwächen**
-    
+
             - **Lokale Methode:** Eine Erklärung für einen Pinguin sagt
               nicht automatisch etwas über andere Pinguine aus.
-    
+
             - **Abhängigkeit von Hyperparametern:** Die Erklärung kann sich
               beispielsweise mit der Kernel-Breite oder der Anzahl der
               erzeugten Perturbationen verändern.
-    
+
             - **Stochastisch:** Durch die zufällige Erzeugung von
               Perturbationen können sich Erklärungen zwischen verschiedenen
               Läufen unterscheiden.
-    
+
             - **Surrogatmodell ist nur eine Approximation:** Das einfache
               Modell muss das Black-Box-Modell nicht außerhalb der lokalen
               Umgebung korrekt beschreiben.
-    
+
             - **Keine Kausalität:** Ein hoher Feature-Beitrag bedeutet nicht,
               dass dieses Merkmal die Vorhersage kausal verursacht.
             """
