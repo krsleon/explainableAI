@@ -1,8 +1,8 @@
 ---
-titel: "Das ist ein Test"
+titel: "Explainable AI"
 emoji: ":)"
 mitglieder:
-  - "Katharina Gudat"
+  - "Katharina Gudat, Leon Kraus"
 kurzbeschreibung: "huhu :)"
 ---
 
