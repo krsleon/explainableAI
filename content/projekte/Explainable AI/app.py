@@ -147,7 +147,8 @@ with tab_daten:
 with tab_blackbox:
     st.markdown("## 3 · Das Blackbox-Modell")
     st.markdown("Wir trainieren ein Random Forest Modell, um die Art der Pinguine anhand der vier ausgewählten Features vorherzusagen. "
-                "Dafur verwenden wir die sklearn Bibliothek. Das Modell wird auf 70% der Daten trainiert und auf den restlichen 30% getestet. ")
+                "Dafur verwenden wir die sklearn Bibliothek. Das Modell wird auf 70% der Daten trainiert und auf den restlichen 30% getestet. "
+                "Der Random Forest enthält 70 Bäume und ist damit ein komplexes Modell, das nicht mehr direkt interpretierbar ist. ")
     accuracy = accuracy_score(y_test, y_pred)
 
     st.metric(
@@ -181,6 +182,9 @@ with tab_blackbox:
         fig_cm,
         use_container_width=True
     )
+    
+    st.markdown("Die Confusion Matrix zeigt, dass das Modell die Arten der Pinguine sehr gut vorhersagen kann. Die meisten Fehler treten bei der Unterscheidung zwischen Adelie und Chinstrap auf, allerdings irrt sich das Modell nur in 3 Fällen. ")
+    
     importance_df = pd.DataFrame({
     "Feature": analyse.standard_features,
     "Importance": model.feature_importances_
@@ -200,21 +204,26 @@ with tab_blackbox:
         "Feature": "Feature"
     }
     )
-    
+
     fig_importance.update_traces(
         texttemplate="%{text:.3f}",
         textposition="outside"
     )
-    
+
     fig_importance.update_layout(
         xaxis_range=[0, importance_df["Importance"].max() * 1.15],
         height=400
     )
-    
+
     st.plotly_chart(
         fig_importance,
         use_container_width=True
     )
+    
+    st.markdown("Die Feature-Importance des Random Forests gibt an, wie oft das Modell ueber ein bestimmtes Feature splittet, um seine Klassifizierung abzuleiten."
+                " Die Feature-Importance ist eine globale Metrik, die das Verhalten des Modells über alle Pinguine hinweg beschreibt. Sie sagt jedoch nichts darüber aus, wie das Modell eine bestimmte Vorhersage für einen einzelnen Pinguin getroffen hat. "
+                "Die Schnabellänge ist das wichtigste Feature, gefolgt von der Flossenlänge. Die Körpermasse und die Schnabeltiefe sind weniger wichtig für die Vorhersage der Pinguinart. "
+                "Das kann man auch aus den Scatter-Plots des Datensatzes ableiten.")
     
 
 
@@ -536,6 +545,21 @@ with tab_lime:
               dass dieses Merkmal die Vorhersage kausal verursacht.
             """
         )
+    st.warning(
+     """
+     ⚠️ **Wichtig: Erklärung ≠ Kausalität**
+
+     Die von LIME oder SHAP berechneten Feature-Beiträge beschreiben,
+     welche Merkmale für die Vorhersage des Modells relevant sind.
+     Sie zeigen **keine kausalen Zusammenhänge** zwischen den Merkmalen
+     und der Zielvariable.
+
+     Insbesondere sind sie **keine Counterfactuals**: Aus einem positiven
+     Beitrag von z.B. „Körpermasse“ folgt nicht, dass eine Änderung der
+     Körpermasse tatsächlich die Spezies eines Pinguins verändern würde.
+     """    
+    )
+    st.markdown("### Good to know")
     st.info(
     """
     💡 **LIME ist nicht auf Tabellendaten beschränkt**
@@ -561,7 +585,8 @@ with tab_lime:
     
     st.markdown("## Weiterführende Literatur")
     st.markdown(
-    "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier<b>, Ribeiro et al., 2016."
+    "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier</b>, Ribeiro et al., 2016."
+    "- <b>Interpretable Machine Learning</b>, Christoph Molnar, 2020."
     )
 
 
@@ -802,6 +827,44 @@ with tab_ausblick:
     st.markdown("## 6 · Ausblick: Weitere Ansätze der Explainable AI")
     st.caption(
         "Ein Überblick über moderne Forschungsrichtungen: Von inhärent interpretierbaren Modellen (By Design) bis zu fortgeschrittenen Post-Hoc Methoden."
+        "Fazit und weitere globale und lokale Methoden zur Interpretation von KI-Modellen."
+    )
+    st.markdown("### Fazit: Was lernen wir aus LIME und SHAP?")
+
+    st.markdown(
+        """
+        LIME und SHAP bieten zwei Möglichkeiten, die Vorhersagen eines
+        Black-Box-Modells verständlicher zu machen. Sie können zeigen, welche
+        Merkmale für eine Vorhersage besonders relevant sind und damit einen
+        Einblick in das Verhalten des Modells geben.
+
+        Gleichzeitig sind solche Erklärungen nicht unbedingt eindeutig.
+        Unterschiedliche Methoden können einem Merkmal unterschiedliche
+        Beiträge zuweisen. Auch bei LIME kann sich die Erklärung beispielsweise
+        mit der Wahl der Kernel-Breite oder der zufälligen Perturbationen
+        verändern. Eine einzelne Erklärung sollte daher nicht als die
+        „wahre“ Begründung einer Modellentscheidung interpretiert werden.
+
+        Damit ist Explainable AI weniger eine Methode, mit der man eine
+        einzelne „richtige“ Erklärung erhält, sondern vielmehr ein Werkzeug,
+        um die Funktionsweise und mögliche Schwächen eines Modells kritisch
+        zu untersuchen.
+        """
+    )
+
+    st.info(
+        """
+        💡 **Eine XAI-Methode erklärt das Modell – nicht die Realität.**
+
+        Feature-Beiträge von LIME oder SHAP beschreiben, wie das Modell seine
+        Vorhersage aus den Eingabedaten konstruiert. Sie zeigen weder
+        automatisch kausale Zusammenhänge noch, was bei einer tatsächlichen
+        Änderung eines Merkmals passieren würde.
+
+        Für eine zuverlässige Interpretation ist es deshalb sinnvoll,
+        verschiedene Instanzen und – wenn möglich – verschiedene
+        Erklärungsverfahren miteinander zu vergleichen.
+        """
     )
 
     st.markdown(
@@ -939,7 +1002,98 @@ with tab_ausblick:
     st.dataframe(pd.DataFrame(vergleich_data), hide_index=True, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("### 4 · Zentrale Herausforderungen der aktuellen XAI-Forschung")
+    st.markdown("### 4 · Globale Erklärungen")
+
+    st.markdown(
+        """
+        Während eine lokale Methode wie LIME fragt
+
+        > *„Warum hat das Modell diesen Pinguin als Gentoo klassifiziert?“*
+
+        untersuchen globale Methoden die Frage
+
+        > *„Wie verhält sich das Modell insgesamt?“*
+
+        Einige wichtige modellunabhängige Verfahren sind:
+        """
+    )
+
+    st.markdown(
+        """
+        **Permutation Feature Importance**  
+        Misst, wie stark sich die Modellleistung verschlechtert, wenn die
+        Werte eines Merkmals zufällig vertauscht werden. Dadurch lässt sich
+        abschätzen, welche Merkmale für die Vorhersage insgesamt wichtig sind.
+
+        **Partial Dependence Plots (PDP)**  
+        Zeigen, wie sich die durchschnittliche Modellvorhersage verändert,
+        wenn ein Merkmal systematisch variiert wird, während die anderen
+        Merkmale berücksichtigt werden.
+
+        **Accumulated Local Effects (ALE)**  
+        Haben ein ähnliches Ziel wie PDPs, berücksichtigen jedoch lokale
+        Änderungen der Vorhersage und sind insbesondere bei korrelierten
+        Merkmalen häufig besser geeignet.
+        """
+    )
+
+    st.info(
+        """
+        💡 **Global oder lokal?**
+
+        **Globale Methoden** beschreiben das Verhalten des Modells über viele
+        oder alle Datenpunkte hinweg. **Lokale Methoden** erklären dagegen
+        eine einzelne Vorhersage.
+
+        Eine Übersicht und ausführlichere Erklärungen zu diesen Methoden
+        findest du hier:
+        """
+    )
+    st.page_link("views/ml/explainable_ml.py", label="Globale xAI", icon="🗂️")
+
+    st.markdown("---")
+    st.markdown("### 5 · Explainable AI für neuronale Netze")
+
+    st.markdown(
+        """
+        Für neuronale Netze können zusätzlich Methoden verwendet werden, die
+        deren interne Struktur oder Gradienten ausnutzen. Dadurch können
+        beispielsweise einzelne Eingabemerkmale oder Pixel eines Bildes
+        bestimmten Vorhersagen zugeordnet werden.
+        """
+    )
+
+    st.markdown(
+        """
+        **Saliency Maps**  
+        Untersuchen den Gradienten der Modellvorhersage bezüglich der
+        Eingabedaten. Bei Bildklassifikationen kann so sichtbar gemacht
+        werden, welche Pixel besonders stark mit der Vorhersage verbunden sind.
+
+        **Integrated Gradients**  
+        Integrieren die Gradienten der Modellvorhersage entlang eines Pfades
+        von einer Referenz-Eingabe zur tatsächlichen Eingabe. Dadurch wird
+        der Einfluss einzelner Eingabemerkmale auf die Vorhersage
+        quantifiziert.
+
+        **DeepLIFT**  
+        Vergleicht die Aktivierungen eines neuronalen Netzes für die
+        tatsächliche Eingabe mit denen für eine Referenz-Eingabe und
+        propagiert diese Unterschiede rückwärts durch das Netzwerk.
+        """
+    )
+
+    st.markdown(
+        """
+        Diese Verfahren sind besonders für neuronale Netze interessant, da
+        sie Informationen über deren Differenzierbarkeit und interne
+        Aktivierungen verwenden können. Im Gegensatz zu LIME sind sie daher
+        nicht vollständig modellunabhängig.
+        """
+    )
+
+    st.markdown("---")
+    st.markdown("### 6 · Zentrale Herausforderungen der aktuellen XAI-Forschung")
 
     merkkasten(
         "Offene Fragen und zukünftige Forschungsfelder",
@@ -951,7 +1105,7 @@ with tab_ausblick:
     )
 
     st.markdown("---")
-    st.markdown("### 5 · Weiterführende Literatur zu modernen XAI-Ansätzen")
+    st.markdown("### 7 · Weiterführende Literatur zu modernen XAI-Ansätzen")
     st.markdown(
         """
 - **Rudin, C. (2019):** *Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead.* Nature Machine Intelligence, 1(5), 206–215. *(Plädoyer für By-Design Interpretierbarkeit)*
