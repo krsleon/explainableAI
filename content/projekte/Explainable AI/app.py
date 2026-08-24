@@ -147,3 +147,13 @@ with tab_lime:
     st.markdown(
     "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier<b>, Ribeiro et al., 2016."
         )
+    with tab_blackbox:
+        st.markdown(
+            "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind."
+        )
+        st.markdown(
+            "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
+        )
+        st.markdown(
+            "Aus diesem Grund spricht man von *Blackbox-Modellen*."
+        )
