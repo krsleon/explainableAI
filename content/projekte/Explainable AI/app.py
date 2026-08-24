@@ -361,25 +361,16 @@ st.markdown(
 
     fig.update_layout(
         title=(
-            f"LIME explanation for {predicted_class}"
-            f"<br><sup>Kernel width = {kernel_width}</sup>"
+            f"LIME Erklärung für {predicted_class}"
+            f"<br><sup>Kernelbreite = {kernel_width}</sup>"
         ),
         height=400,
-        showlegend=False
+        showlegend=False,
     )
 
     st.plotly_chart(
         fig,
-        use_container_width=True
-    )
-    
-    fig.update_layout(
-    title=(
-        f"LIME Erklärung für {predicted_class}"
-        f"<br><sup>Kernelbreite = {kernel_width}</sup>"
-    ),
-    height=400,
-    showlegend=False
+        use_container_width=True,
     )
     
     st.markdown("ADD INTERPRETATION OF THE RESULTS")
@@ -663,7 +654,7 @@ $$
     st.markdown(
         f"""
 **Interpretation des Waterfall Plots im Vergleich zu LIME (Tab 4):**
-- Der Plot startet unten beim Erwartungswert $\\mathbb{E}[f(X)] = {shap_vals[instance_idx, :, p_pred_idx].base_values:.2f}$ (Basis-Wahrscheinlichkeit vor Kenntnis der Merkmale).
+- Der Plot startet unten beim Erwartungswert $\\mathbb{{E}}[f(X)] = {shap_vals[instance_idx, :, p_pred_idx].base_values:.2f}$ (Basis-Wahrscheinlichkeit vor Kenntnis der Merkmale).
 - Jeder rote Balken $(+)$ erhöht die Wahrscheinlichkeit für **{p_pred}**, jeder blaue Balken $(-)$ senkt sie.
 - Am Ende summiert sich alles exakt auf den finalen Ausgabewert $f(x) = {p_proba[p_pred_idx]:.2f}$.
 - **Unterschied zu LIME:** Während LIME eine *lokale Heuristik* über Zufallsstörungen trainiert, liefert SHAP eine *exakte, spieltheoretisch garantierte* additive Attribution.
