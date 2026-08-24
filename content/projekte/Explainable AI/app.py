@@ -227,17 +227,17 @@ with tab_lime:
         instance_to_explain.reshape(1, -1)
     )[0]
 
-    st.write(f"**Actual species:** {actual_class}")
-    st.write(f"**Predicted species:** {predicted_class}")
-    st.markdown("Feature values of the selected instance:")
+    st.write(f"**Tatsächliche Art:** {actual_class}")
+    st.write(f"**Vorhergesagte Art:** {predicted_class}")
+    st.markdown("Eigenschaften des gewählten Pinguins:")
     st.dataframe(
     X_test.iloc[[instance_idx]],
     hide_index=True,
     use_container_width=True
     )
-    st.markdown("### Kernel-dependence of LIME explanations")
+    st.markdown("### Kernel-Abhängigkeit von LIME Erklärungen")
     kernel_width = st.slider(
-        "Kernel width",
+        "Kernel width - Wie lokal ist unsere Erklärung?",
         min_value=0.1,
         max_value=5.0,
         value=1.0,
@@ -245,27 +245,28 @@ with tab_lime:
     )
     explainer = analyse.create_lime_explainer(model, data, kernel_width)
     explanation = analyse.explain_instance(explainer, model, instance_to_explain)
-    lime_values = explanation.as_list()
+    lime_values = explanation.as_list(explanation.top_labels[0])
     
     # Convert LIME output into a DataFrame
     lime_df = pd.DataFrame(
         lime_values,
-        columns=["Feature", "Contribution"]
+        columns=["Feature", "Beitrag zur Vorhersage"]
     )
 
     # Sort so the strongest contributions appear at the top
     lime_df = lime_df.sort_values(
-        "Contribution",
+        "Beitrag zur Vorhersage",
         ascending=True
     )
 
     fig = px.bar(
         lime_df,
-        x="Contribution",
+        x="Beitrag zur Vorhersage",
         y="Feature",
         orientation="h",
+        title=f"LIME Vorhersage — {predicted_class}",
         labels={
-            "Contribution": "Contribution to prediction",
+            "Contribution": "Beitrag zur Vorhersage",
             "Feature": "Feature"
         }
     )
@@ -288,6 +289,15 @@ with tab_lime:
     st.plotly_chart(
         fig,
         use_container_width=True
+    )
+    
+    fig.update_layout(
+    title=(
+        f"LIME Erklärung für {predicted_class}"
+        f"<br><sup>Kernelbreite = {kernel_width}</sup>"
+    ),
+    height=400,
+    showlegend=False
     )
     
     
