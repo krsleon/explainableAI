@@ -131,11 +131,11 @@ with tab_lime:
         "Anschließend wird ein einfaches Modell (z.B. lineares Modell, Decision Tree) auf diesen Daten trainiert, um die Vorhersage des Black-Box-Modells zu erklären."
         "Es handelt sich um eine lokale Methode, da eine Erklärung nur für eine einzelne Vorhersage/Instanz - in unserem Beispiel für einen Pinguin - erzeugt wird, und nicht für das gesamte Modell."
     )
-    #instance_idx = st.selectbox(
-    #"Penguin to explain",
-    #options=range(len(X_test)),
-    #index=7
-    #)
+    instance_idx = st.selectbox(
+    "Penguin to explain",
+    options=15,
+    index=7
+    )
     kernel_width = st.slider(
     "Kernel width",
     min_value=0.1,
@@ -143,6 +143,7 @@ with tab_lime:
     value=1.0,
     step=0.1
     )
+    
     st.markdown("## Weiterführende Literatur")
     st.markdown(
     "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier<b>, Ribeiro et al., 2016."
