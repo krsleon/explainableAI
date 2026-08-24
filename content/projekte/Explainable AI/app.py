@@ -20,6 +20,9 @@ if str(ORDNER) not in sys.path:
 import analyse  # noqa: E402  (erst nach dem sys.path-Eintrag importierbar)
 from utils.theming import FARBEN, merkkasten
 
+data = analyse.load_data()
+model, X_test, y_test = analyse.train_blackbox(data, report=False)
+
 st.markdown("# Explainable AI: Wie können wir Black-Box Modelle verstehen?")
 st.caption(
     "Projekt von Katharina Gudat und Leon Kraus · Daten: Palmer Penguins, 2014, 344 Penguins"
@@ -67,7 +70,6 @@ with tab_intro:
 
 #============================================================= Daten
 with tab_daten:
-    data = analyse.load_data()
     st.markdown("## 2 · Daten: Palmer Penguins")
     st.caption(
         "Die Daten stammen aus dem Datensatz 'Palmer Penguins' von Allison Horst, 2014. "
@@ -133,9 +135,26 @@ with tab_lime:
     )
     instance_idx = st.selectbox(
     "Penguin to explain",
-    options=15,
+    options=range(len(X_test)),
     index=7
     )
+    instance_to_explain = X_test.iloc[instance_idx].to_numpy()
+
+    actual_class = y_test.iloc[instance_idx]
+
+    predicted_class = model.predict(
+        instance_to_explain.reshape(1, -1)
+    )[0]
+
+    st.write(f"**Actual species:** {actual_class}")
+    st.write(f"**Predicted species:** {predicted_class}")
+    st.markdown("Feature values of the selected instance:")
+    st.dataframe(
+    X_test.iloc[[instance_idx]],
+    hide_index=True,
+    use_container_width=True
+    )
+    st.markdown("### Kernel-dependence of LIME explanations")
     kernel_width = st.slider(
     "Kernel width",
     min_value=0.1,
