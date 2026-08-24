@@ -118,6 +118,43 @@ with tab_daten:
     st.plotly_chart(fig, use_container_width=True)
     
     
+#============================================================= Blackbox-Modell
+with tab_blackbox:
+    st.markdown("## 3 · Das Blackbox-Modell")
+    st.markdown(
+        "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind."
+    )
+    st.markdown(
+        "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
+    )
+    st.markdown(
+        "Aus diesem Grund spricht man von *Blackbox-Modellen*."
+    )
+
+   
+
+    st.markdown(
+        """
+        ## Darum suchen wir Ansätze, um Ergebnisse interpretierbar zu machen...
+
+        Ein reines Vorhersageergebnis reicht in der Praxis selten aus:
+        - **Vertrauen & Validierung:** Trifft das Modell Entscheidungen anhand biologisch plausibler Merkmale oder verlässt es sich auf zufällige Artefakte im Datensatz?
+        - **Fehlersuche & Debugging:** Warum wurde ein bestimmter Pinguin falsch klassifiziert? Welches Merkmal hat den Ausschlag gegeben?
+        - **Verantwortung & Nachvollziehbarkeit:** In kritischen Anwendungen müssen Entscheidungen gegenüber Anwendern und Regulatoren begründet werden können.
+
+        Um den Konflikt zwischen hoher Vorhersageleistung und mangelnder Transparenz aufzulösen, setzt **Explainable AI (XAI)** auf *modellagnostische Post-Hoc-Erklärungen*. 
+        Dabei wird das Verhalten der Black Box von außen beobachtet und analysiert – wie in den folgenden Tabs an zwei führenden Verfahren demonstriert wird:
+        """
+    )
+
+    merkkasten(
+        "Ansätze für mehr Erklärbarkeit",
+        "• <b>LIME (Tab 4):</b> Erklärt einzelne Vorhersagen lokal durch ein einfaches lineares Ersatzmodell in der direkten Nachbarschaft eines Datenpunkts.<br>"
+        "• <b>SHAP (Tab 5):</b> Nutzt Konzepte der kooperativen Spieltheorie, um den exakten, fairen Beitrag jedes einzelnen Merkmals zur Entscheidung zu quantifizieren.",
+        typ="definition",
+    )
+
+
 #============================================================= LIME
 with tab_lime:
     st.markdown("## 4 · LIME: Local Interpretable Model-agnostic Explanations")
@@ -137,23 +174,253 @@ with tab_lime:
     #index=7
     #)
     kernel_width = st.slider(
-    "Kernel width",
-    min_value=0.1,
-    max_value=5.0,
-    value=1.0,
-    step=0.1
+        "Kernel width",
+        min_value=0.1,
+        max_value=5.0,
+        value=1.0,
+        step=0.1,
     )
     st.markdown("## Weiterführende Literatur")
     st.markdown(
     "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier<b>, Ribeiro et al., 2016."
+    )
+
+
+#============================================================= SHAP
+with tab_shap:
+    st.markdown("## 5 · SHAP: SHapley Additive exPlanations")
+    st.caption(
+        "SHAP quantifiziert den fairen Beitrag jedes einzelnen Merkmals zur Modellentscheidung, basierend auf Konzepten der kooperativen Spieltheorie."
+    )
+
+    # ------------------------------------------------ 1. Erklärung & Formel
+    st.markdown("### 1 · Erklärung der Methode: Spieltheorie & Mathematische Grundlagen")
+    st.markdown(
+        r"""
+Die Methode **SHAP (SHapley Additive exPlanations)** überträgt ein klassisches Konzept der kooperativen Spieltheorie von Lloyd Shapley (1953, Wirtschaftsnobelpreis) auf das maschinelle Lernen:
+
+- **Die Spieler:** Die einzelnen Merkmale $x_j$ (Schnabellänge, Schnabeltiefe, Flossenlänge, Körpergewicht) eines Pinguins.
+- **Das Spiel:** Das trainierte Vorhersagemodell $f(x)$ (unser Random Forest).
+- **Die Auszahlung (Payout):** Der Unterschied zwischen der konkreten Vorhersage $f(x)$ und der durchschnittlichen Baseline-Vorhersage $\mathbb{E}[f(X)]$.
+
+Der **Shapley Value** $\phi_j$ weist jedem Merkmal $j$ einen fairen Anteil an diesem Gewinn zu. Er wird berechnet als der gewichtete mittlere **Marginalbeitrag** über alle möglichen Teilmengen (Koalitionen) $S$ der Merkmalsmenge $F$:
+
+$$
+\phi_j(x) = \sum_{S \subseteq F \setminus \{j\}} \frac{|S|! \, (|F| - |S| - 1)!}{|F|!} \cdot \Big( v(S \cup \{j\}) - v(S) \Big)
+$$
+
+**Bedeutung der Komponenten in der Formel:**
+- $F$: Die Menge aller Merkmale im Datensatz ($|F| = 4$).
+- $S \subseteq F \setminus \{j\}$: Eine Koalition (Teilmenge) von Merkmalen, die Merkmal $j$ noch *nicht* enthält.
+- $\frac{|S|! \, (|F| - |S| - 1)!}{|F|!}$: Das kombinatorische Gewicht – die Wahrscheinlichkeit, dass Merkmal $j$ bei einer zufälligen Reihenfolgebildung genau nach der Koalition $S$ hinzugefügt wird.
+- $v(S \cup \{j\}) - v(S)$: Der **marginale Mehrwert**, den Merkmal $j$ zur bestehenden Koalition $S$ beisteuert (wobei $v(S)$ der Modell-Erwartungswert ist, wenn nur die Merkmale in $S$ bekannt sind).
+"""
+    )
+
+    merkkasten(
+        "Die vier mathematischen Garantien (Axiome) von SHAP",
+        "• <b>1. Effizienz (Additivität):</b> $\\sum_{j=1}^{|F|} \\phi_j(x) = f(x) - \\mathbb{E}[f(X)]$ — die Summe aller Feature-Beiträge ergibt exakt die Abweichung vom globalen Durchschnitt.<br>"
+        "• <b>2. Symmetrie:</b> Zwei Merkmale mit identischem Einfluss auf alle Koalitionen erhalten immer denselben Shapley Value.<br>"
+        "• <b>3. Dummy (Null-Effekt):</b> Ein Merkmal, das den Vorhersagewert in keiner Koalition ändert, erhält exakt $\\phi_j = 0$.<br>"
+        "• <b>4. TreeSHAP:</b> Für baumbasierte Ensembles (wie Random Forests) wertet TreeSHAP diese Summe nicht exponentiell ($2^{|F|}$), sondern in polynomieller Laufzeit $\\mathcal{O}(TLD^2)$ exakt entlang der Baumstrukturen aus.",
+        typ="definition",
+    )
+
+    # ------------------------------------------------ Modell & Caching
+    @st.cache_resource
+    def load_shap_model_and_data():
+        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.model_selection import train_test_split
+        import shap
+
+        df = analyse.load_data()
+        feature_names = [
+            "bill_length_mm",
+            "bill_depth_mm",
+            "flipper_length_mm",
+            "body_mass_g",
+        ]
+        X = df[feature_names]
+        Y = df["species"]
+
+        X_train, X_test, Y_train, Y_test = train_test_split(
+            X,
+            Y,
+            test_size=0.35,
+            random_state=42,
+            stratify=Y,
         )
-    with tab_blackbox:
-        st.markdown(
-            "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind."
+
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_train, Y_train)
+
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer(X_test)
+        classes = list(model.classes_)
+
+        return model, explainer, shap_values, X_test, Y_test, classes, feature_names
+
+    rf_model, tree_explainer, shap_vals, X_test, Y_test, class_names, feat_names = load_shap_model_and_data()
+
+    # ------------------------------------------------ 2. Globale Ergebnisse
+    st.markdown("---")
+    st.markdown("### 2 · Interaktive globale Ergebnisse: Merkmalseinfluss pro Spezies")
+    st.markdown(
+        "Wähle eine Pinguinart aus. Anschließend werden die globalen Feature-Contributions (Beeswarm Plot & mittlere Wichtigkeit) für diese Zielklasse berechnet und visualisiert:"
+    )
+
+    selected_species = st.radio(
+        "Ziel-Spezies auswählen:",
+        options=class_names,
+        index=2,  # Default: Gentoo
+        horizontal=True,
+    )
+    species_idx = class_names.index(selected_species)
+
+    import matplotlib.pyplot as plt
+    import shap
+
+    col_g1, col_g2 = st.columns(2)
+
+    with col_g1:
+        st.markdown(f"**SHAP Beeswarm Plot ({selected_species})**")
+        st.caption("Punkte = Pinguine im Testset. Farbe = Feature-Wert (rot = hoch, blau = niedrig). Position = Einfluss auf die Klassifikation.")
+        fig_bee, ax_bee = plt.subplots(figsize=(6.5, 4.2))
+        shap.plots.beeswarm(shap_vals[:, :, species_idx], show=False)
+        plt.title(f"Einfluss der Features auf '{selected_species}'", fontsize=12, pad=10)
+        plt.tight_layout()
+        st.pyplot(fig_bee, use_container_width=True)
+        plt.close(fig_bee)
+
+    with col_g2:
+        st.markdown(f"**Globale Feature Importance |SHAP| ({selected_species})**")
+        st.caption("Mittlere absolute SHAP-Werte $\\frac{1}{n}\\sum |\\phi_j|$ – zeigt, welche Merkmale die stärkste Gesamthebelwirkung besitzen.")
+        fig_bar, ax_bar = plt.subplots(figsize=(6.5, 4.2))
+        shap.plots.bar(shap_vals[:, :, species_idx], show=False)
+        plt.title(f"Mittlere Wichtigkeit für '{selected_species}'", fontsize=12, pad=10)
+        plt.tight_layout()
+        st.pyplot(fig_bar, use_container_width=True)
+        plt.close(fig_bar)
+
+    # Spezifische Interpretation je nach ausgewählter Spezies
+    if selected_species == "Gentoo":
+        st.info(
+            "🐧 **Erkenntnis für Gentoo:** Eine hohe Flossenlänge (`flipper_length_mm`) und eine hohe Körpermasse (`body_mass_g`) treiben die Modellvorhersage stark in Richtung Gentoo (rote Punkte weit rechts). Eine geringere Schnabeltiefe begünstigt Gentoo zusätzlich."
         )
-        st.markdown(
-            "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
+    elif selected_species == "Chinstrap":
+        st.info(
+            "🐧 **Erkenntnis für Chinstrap (Zügelpinguin):** Eine lange Schnabellänge (`bill_length_mm`) in Kombination mit geringerer Körpermasse und moderaten Flossenlängen trennt Chinstrap sehr präzise von Adelie und Gentoo."
         )
-        st.markdown(
-            "Aus diesem Grund spricht man von *Blackbox-Modellen*."
+    else:  # Adelie
+        st.info(
+            "🐧 **Erkenntnis für Adelie:** Kürzere Schnäbel (`bill_length_mm`) und kürzere Flossen sind das zentrale Erkennungsmerkmal für Adeliepinguine. Hohe Schnabellängen senken die Adelie-Wahrscheinlichkeit drastisch."
         )
+
+    # ------------------------------------------------ 3. Lokale Ergebnisse (Vergleich LIME)
+    st.markdown("---")
+    st.markdown("### 3 · Interaktive lokale Ergebnisse: Einzelfall-Erklärung (Waterfall Plot)")
+    st.markdown(
+        "Hier untersuchen wir konkrete Pinguine aus dem Testdatensatz. Wähle einen Test-Pinguin aus, um den exakten Zerlegungspfad der Entscheidung nachzuvollziehen:"
+    )
+
+    col_sel1, col_sel2 = st.columns([2, 1])
+    with col_sel1:
+        preset_choice = st.selectbox(
+            "Pinguin-Instanz auswählen:",
+            options=[
+                "Pinguin #4 (Tatsächlich: Gentoo) — Hohe Modellsicherheit",
+                "Pinguin #0 (Tatsächlich: Gentoo) — Typisches Exemplar",
+                "Pinguin #2 (Tatsächlich: Chinstrap) — Zügelpinguin",
+                "Pinguin #7 (Tatsächlich: Adelie) — Adeliepinguin",
+                "Pinguin #10 (Tatsächlich: Adelie) — Typisches Exemplar",
+                "Eigene Index-Eingabe...",
+            ],
+            index=0,
+        )
+    with col_sel2:
+        if preset_choice == "Eigene Index-Eingabe...":
+            instance_idx = int(
+                st.number_input(
+                    "Test-Index (0 bis 116):",
+                    min_value=0,
+                    max_value=len(X_test) - 1,
+                    value=4,
+                )
+            )
+        else:
+            preset_map = {
+                "Pinguin #4 (Tatsächlich: Gentoo) — Hohe Modellsicherheit": 4,
+                "Pinguin #0 (Tatsächlich: Gentoo) — Typisches Exemplar": 0,
+                "Pinguin #2 (Tatsächlich: Chinstrap) — Zügelpinguin": 2,
+                "Pinguin #7 (Tatsächlich: Adelie) — Adeliepinguin": 7,
+                "Pinguin #10 (Tatsächlich: Adelie) — Typisches Exemplar": 10,
+            }
+            instance_idx = preset_map[preset_choice]
+
+    # Daten des ausgewählten Pinguins
+    p_instance = X_test.iloc[[instance_idx]]
+    p_true = Y_test.iloc[instance_idx]
+    p_pred = rf_model.predict(p_instance)[0]
+    p_pred_idx = class_names.index(p_pred)
+    p_proba = rf_model.predict_proba(p_instance)[0]
+
+    # Datenübersicht anzeigen
+    st.markdown("**Merkmalswerte und Modellprognose für diesen Pinguin:**")
+    metrics_cols = st.columns(6)
+    metrics_cols[0].metric("Schnabellänge", f"{p_instance['bill_length_mm'].values[0]:.1f} mm")
+    metrics_cols[1].metric("Schnabeltiefe", f"{p_instance['bill_depth_mm'].values[0]:.1f} mm")
+    metrics_cols[2].metric("Flossenlänge", f"{p_instance['flipper_length_mm'].values[0]:.0f} mm")
+    metrics_cols[3].metric("Körpermasse", f"{p_instance['body_mass_g'].values[0]:.0f} g")
+    metrics_cols[4].metric("Tatsächlich", p_true)
+    metrics_cols[5].metric("Vorhersage", f"{p_pred} ({p_proba[p_pred_idx]:.1%})")
+
+    # Waterfall Plot für die vorhergesagte Klasse
+    fig_water, ax_water = plt.subplots(figsize=(8, 4.5))
+    shap.plots.waterfall(shap_vals[instance_idx, :, p_pred_idx], show=False)
+    plt.title(f"SHAP Waterfall Plot für Pinguin #{instance_idx} (Erklärung für Vorhersage: '{p_pred}')", fontsize=12, pad=12)
+    plt.tight_layout()
+    st.pyplot(fig_water, use_container_width=True)
+    plt.close(fig_water)
+
+    st.markdown(
+        f"""
+**Interpretation des Waterfall Plots im Vergleich zu LIME (Tab 4):**
+- Der Plot startet unten beim Erwartungswert $\\mathbb{E}[f(X)] = {shap_vals[instance_idx, :, p_pred_idx].base_values:.2f}$ (Basis-Wahrscheinlichkeit vor Kenntnis der Merkmale).
+- Jeder rote Balken $(+)$ erhöht die Wahrscheinlichkeit für **{p_pred}**, jeder blaue Balken $(-)$ senkt sie.
+- Am Ende summiert sich alles exakt auf den finalen Ausgabewert $f(x) = {p_proba[p_pred_idx]:.2f}$.
+- **Unterschied zu LIME:** Während LIME eine *lokale Heuristik* über Zufallsstörungen trainiert, liefert SHAP eine *exakte, spieltheoretisch garantierte* additive Attribution.
+"""
+    )
+
+    # ------------------------------------------------ 4. Limitationen
+    st.markdown("---")
+    st.markdown("### 4 · Worin liegen die Limitations von SHAP?")
+    merkkasten(
+        "Kritische Grenzen und Fallstricke von SHAP",
+        "1. <b>Erklärung des Modells $\\neq$ Erklärung der Wirklichkeit (Keine Kausalität):</b> SHAP erklärt ausschließlich die interne mathematische Funktionsweise des trainierten Modells. Wenn das Modell einen Scheinzusammenhang oder Confounder lernt, erhält dieser einen hohen SHAP-Wert, obwohl in der realen Biologie kein Kausaleffekt vorliegt.<br><br>"
+        "2. <b>Annahme unabhängiger Merkmale:</b> Standard-KernelSHAP permutiert Features unabhängig. Bei korrelierten Merkmalen (z. B. Flossenlänge und Körpergewicht) werden Koalitionen evaluiert, die in der Realität physikalisch unmöglich sind (z. B. 6 kg Pinguin mit 130 mm Flossen).<br><br>"
+        "3. <b>Rechenaufwand bei modellagnostischer Nutzung:</b> Für beliebige Blackbox-Modelle müssen bei $M$ Features potenziell alle $2^M$ Koalitionen berechnet werden. TreeSHAP umgeht dies für Entscheidungsbäume, ist jedoch an diese Modellklasse gebunden.<br><br>"
+        "4. <b>Multi-Class-Komplexität:</b> Da SHAP für jede Klasse separate Attributionswerte berechnet, kann die gleichzeitige Interpretation von 3 oder mehr Klassen für Anwender kognitiv anspruchsvoll sein.",
+        typ="achtung",
+    )
+
+    # ------------------------------------------------ 5. Weiterführende Literatur
+    st.markdown("---")
+    st.markdown("### 5 · Weiterführende Literatur")
+    st.markdown(
+        """
+- **Lundberg, S. M., & Lee, S.-I. (2017):** *A Unified Approach to Interpreting Model Predictions.* Advances in Neural Information Processing Systems (NeurIPS 2017), 4765–4774. *(Das Grundlagen-Paper zu SHAP)*
+- **Lundberg, S. M. et al. (2020):** *From local explanations to global understanding with explainable AI for trees.* Nature Machine Intelligence, 2(1), 56–67. *(TreeSHAP-Algorithmus)*
+- **Shapley, L. S. (1953):** *A Value for n-Person Games.* Contributions to the Theory of Games, 2(28), 307–317. *(Originale spieltheoretische Formulierung)*
+- **Molnar, C. (2022):** *Interpretable Machine Learning: A Guide for Making Black Box Models Explainable.* Kapitel 9.5 (Shapley Values) und Kapitel 9.6 (SHAP).
+- **Slack, D. et al. (2020):** *Fooling LIME and SHAP: Adversarial Attacks on Post hoc Explanation Methods.* AIES 2020.
+"""
+    )
+
+
+#============================================================= Ausblick
+with tab_ausblick:
+    st.markdown("## 6 · Ausblick: Andere Ansätze der Explainable AI")
+    st.caption(
+        "Weitere globale und lokale Methoden zur Interpretation von KI-Modellen."
+    )
