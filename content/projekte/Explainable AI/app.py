@@ -40,6 +40,27 @@ tab_intro, tab_daten, tab_blackbox, tab_lime, tab_shap, tab_ausblick = st.tabs(
         "6 · Ausblick: Andere Möglichkeiten",
     ]
 )
+#============================================================= Intro to xAI
+with tab_intro:
+    st.markdown("## 1 · Einleitung: Explainable AI")
+    st.caption(
+        "Explainable AI (xAI) ist ein Forschungsgebiet, das sich mit der Nachvollziehbarkeit von Entscheidungen von KI-Modellen beschäftigt. "
+        "Es geht darum, die Funktionsweise von Modellen zu verstehen und ihre Entscheidungen zu erklären."
+        "Dazu gibt es verschiedene Herangehensweisen, die schematisch in der folgenden Abbildung dargestellt werden."
+    )
+    st.markdown(
+    """
+    <div style="text-align: center;">
+        <img src="images/xAI_overview.png" width="500">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+    st.markdown(
+        "In diesem Projekt werden wir uns auf zwei Methoden konzentrieren: LIME (Local Interpretable Model-agnostic Explanations) und SHAP (SHapley Additive exPlanations). "
+        "Beide Methoden sind darauf ausgelegt, die Vorhersagen von Black-Box-Modellen zu erklären."
+    )
+
 
 #============================================================= Daten
 with tab_daten:
