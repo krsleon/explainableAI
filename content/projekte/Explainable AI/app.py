@@ -203,7 +203,7 @@ with tab_lime:
     )
     explainer = analyse.create_lime_explainer(model, data, kernel_width)
     explanation = analyse.explain_instance(explainer, model, instance_to_explain)
-    lime_values = explanation.as_list()
+    lime_values = explanation.as_list(explanation.top_labels[0])
     
     # Convert LIME output into a DataFrame
     lime_df = pd.DataFrame(
