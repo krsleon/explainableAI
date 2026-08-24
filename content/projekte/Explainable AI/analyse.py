@@ -13,6 +13,9 @@ ORDNER = Path(__file__).parent
 if str(ORDNER) not in sys.path:
     sys.path.insert(0, str(ORDNER))
 
-data = pd.read_csv(ORDNER/'penguins.csv')
-data = data.dropna() # removes rows with NaN values. 333 datapoints remain.
+def load_data():
+    data = pd.read_csv(ORDNER/'penguins.csv')
+    data = data.dropna() # removes rows with NaN values. 333 datapoints remain.
+    return data
+
 

@@ -4,6 +4,7 @@ und die Entscheidung des KI-Modells nachvollziehen?"""
 
 import sys
 from pathlib import Path
+import os
 
 import plotly.graph_objects as go
 import streamlit as st
@@ -48,7 +49,7 @@ with tab_intro:
         "Es geht darum, die Funktionsweise von Modellen zu verstehen und ihre Entscheidungen zu erklären."
         "Dazu gibt es verschiedene Herangehensweisen, die schematisch in der folgenden Abbildung dargestellt werden."
     )
-    st.image(images/xAI_overview.png, caption="Abbildung 1: Überblick über Explainable AI Methoden", use_column_width=True)
+    st.image(os.path.join(ORDNER, "images", "xAI_overview.png"), caption="Abbildung 1: Überblick über Explainable AI Methoden")
     #st.markdown(
     #"""
     #<div style="text-align: center;">
@@ -65,6 +66,7 @@ with tab_intro:
 
 #============================================================= Daten
 with tab_daten:
+    data = analyse.load_data()
     st.markdown("## 2 · Daten: Palmer Penguins")
     st.caption(
         "Die Daten stammen aus dem Datensatz 'Palmer Penguins' von Allison Horst, 2014. "
@@ -74,6 +76,7 @@ with tab_daten:
     st.markdown(
         "Die Daten enthalten die folgenden Spalten: `species`, `island`, `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`, `sex`."
     )
+    
     st.markdown(
         "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen."
     )
