@@ -76,7 +76,7 @@ with tab_daten:
     st.markdown(
         "Die Daten enthalten die folgenden Spalten: `species`, `island`, `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`, `sex`."
     )
-    
+    st.dataframe(data.head(10))
     st.markdown(
         "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen."
     )
