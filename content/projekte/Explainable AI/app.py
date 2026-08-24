@@ -300,20 +300,20 @@ with tab_lime:
 
 #============================================================= SHAP
 with tab_shap:
-    st.markdown("## 5 · SHAP: SHapley Additive exPlanations")
+    st.markdown("## 5 · SHAP: Shapley Additive Explanations")
     st.caption(
-        "SHAP quantifiziert den fairen Beitrag jedes einzelnen Merkmals zur Modellentscheidung, basierend auf Konzepten der kooperativen Spieltheorie."
+        "Kooperative Spieltheorie zur Quantifizierung der Beiträge zur Modellentscheidung."
     )
 
     # ------------------------------------------------ 1. Erklärung & Formel
-    st.markdown("### 1 · Erklärung der Methode: Spieltheorie & Mathematische Grundlagen")
+    st.markdown("### Grundlagen: Spieltheorie & Mathematische Theorie")
     st.markdown(
         r"""
-Die Methode **SHAP (SHapley Additive exPlanations)** überträgt ein klassisches Konzept der kooperativen Spieltheorie von Lloyd Shapley (1953, Wirtschaftsnobelpreis) auf das maschinelle Lernen:
+Die Methode **SHAP (Shapley Additive Explanations)** überträgt ein klassisches Konzept der kooperativen Spieltheorie auf das maschinelle Lernen:
 
-- **Die Spieler:** Die einzelnen Merkmale $x_j$ (Schnabellänge, Schnabeltiefe, Flossenlänge, Körpergewicht) eines Pinguins.
+- **Die Spieler:** Die einzelnen Features $x_j$ (Schnabellänge, Schnabeltiefe, Flossenlänge, Körpergewicht) eines Pinguins.
 - **Das Spiel:** Das trainierte Vorhersagemodell $f(x)$ (unser Random Forest).
-- **Die Auszahlung (Payout):** Der Unterschied zwischen der konkreten Vorhersage $f(x)$ und der durchschnittlichen Baseline-Vorhersage $\mathbb{E}[f(X)]$.
+- **Die Auszahlung (Payout):** Die Differenz zwischen der konkreten Vorhersage $f(x)$ und der durchschnittlichen Baseline-Vorhersage $\mathbb{E}[f(X)]$.
 
 Der **Shapley Value** $\phi_j$ weist jedem Merkmal $j$ einen fairen Anteil an diesem Gewinn zu. Er wird berechnet als der gewichtete mittlere **Marginalbeitrag** über alle möglichen Teilmengen (Koalitionen) $S$ der Merkmalsmenge $F$:
 
@@ -322,15 +322,15 @@ $$
 $$
 
 **Bedeutung der Komponenten in der Formel:**
-- $F$: Die Menge aller Merkmale im Datensatz ($|F| = 4$).
-- $S \subseteq F \setminus \{j\}$: Eine Koalition (Teilmenge) von Merkmalen, die Merkmal $j$ noch *nicht* enthält.
-- $\frac{|S|! \, (|F| - |S| - 1)!}{|F|!}$: Das kombinatorische Gewicht – die Wahrscheinlichkeit, dass Merkmal $j$ bei einer zufälligen Reihenfolgebildung genau nach der Koalition $S$ hinzugefügt wird.
-- $v(S \cup \{j\}) - v(S)$: Der **marginale Mehrwert**, den Merkmal $j$ zur bestehenden Koalition $S$ beisteuert (wobei $v(S)$ der Modell-Erwartungswert ist, wenn nur die Merkmale in $S$ bekannt sind).
+- $F$: Die Menge aller Merkmale im Datensatz ($|F| = 4$)
+- $v(S)$: der Modell-Erwartungswert ist, wenn nur die Merkmale in $S$ bekannt sind
+- $\frac{|S|! \, (|F| - |S| - 1)!}{|F|!}$: Das kombinatorische Gewicht – die Wahrscheinlichkeit, dass Merkmal $j$ bei einer zufälligen Reihenfolgebildung genau nach der Koalition $S$ hinzugefügt wird
+- $v(S \cup \{j\}) - v(S)$: Der **marginale Mehrwert**, den Merkmal $j$ zur bestehenden Koalition $S$ beisteuert 
 """
     )
 
-    merkkasten(
-        "Die vier mathematischen Garantien (Axiome) von SHAP",
+    merkkasten( #TODO: Latex wird hier nicht erkannt, fixen
+        "Die vier mathematischen Axiome von SHAP",
         "• <b>1. Effizienz (Additivität):</b> $\\sum_{j=1}^{|F|} \\phi_j(x) = f(x) - \\mathbb{E}[f(X)]$ — die Summe aller Feature-Beiträge ergibt exakt die Abweichung vom globalen Durchschnitt.<br>"
         "• <b>2. Symmetrie:</b> Zwei Merkmale mit identischem Einfluss auf alle Koalitionen erhalten immer denselben Shapley Value.<br>"
         "• <b>3. Dummy (Null-Effekt):</b> Ein Merkmal, das den Vorhersagewert in keiner Koalition ändert, erhält exakt $\\phi_j = 0$.<br>"
@@ -376,9 +376,9 @@ $$
 
     # ------------------------------------------------ 2. Globale Ergebnisse
     st.markdown("---")
-    st.markdown("### 2 · Interaktive globale Ergebnisse: Merkmalseinfluss pro Spezies")
+    st.markdown("### Globale Ergebnisse: Merkmalseinfluss pro Spezies")
     st.markdown(
-        "Wähle eine Pinguinart aus. Anschließend werden die globalen Feature-Contributions (Beeswarm Plot & mittlere Wichtigkeit) für diese Zielklasse berechnet und visualisiert:"
+        "Wähle eine Pinguinart aus. Anschließend werden die globalen Feature-Contributions für diese Art berechnet und visualisiert:"
     )
 
     selected_species = st.radio(
@@ -396,7 +396,7 @@ $$
 
     with col_g1:
         st.markdown(f"**SHAP Beeswarm Plot ({selected_species})**")
-        st.caption("Punkte = Pinguine im Testset. Farbe = Feature-Wert (rot = hoch, blau = niedrig). Position = Einfluss auf die Klassifikation.")
+        st.caption("Punkte = Pinguine im Testset; Farbe = Feature-Wert; Position = Einfluss auf die Klassifikation")
         fig_bee, ax_bee = plt.subplots(figsize=(6.5, 4.2))
         shap.plots.beeswarm(shap_vals[:, :, species_idx], show=False)
         plt.title(f"Einfluss der Features auf '{selected_species}'", fontsize=12, pad=10)
@@ -406,7 +406,7 @@ $$
 
     with col_g2:
         st.markdown(f"**Globale Feature Importance |SHAP| ({selected_species})**")
-        st.caption("Mittlere absolute SHAP-Werte $\\frac{1}{n}\\sum |\\phi_j|$ – zeigt, welche Merkmale die stärkste Gesamthebelwirkung besitzen.")
+        st.caption("Mittlere absolute SHAP-Werte $\\frac{1}{n}\\sum |\\phi_j|$ ")
         fig_bar, ax_bar = plt.subplots(figsize=(6.5, 4.2))
         shap.plots.bar(shap_vals[:, :, species_idx], show=False)
         plt.title(f"Mittlere Wichtigkeit für '{selected_species}'", fontsize=12, pad=10)
@@ -417,20 +417,20 @@ $$
     # Spezifische Interpretation je nach ausgewählter Spezies
     if selected_species == "Gentoo":
         st.info(
-            "🐧 **Erkenntnis für Gentoo:** Eine hohe Flossenlänge (`flipper_length_mm`) und eine hohe Körpermasse (`body_mass_g`) treiben die Modellvorhersage stark in Richtung Gentoo (rote Punkte weit rechts). Eine geringere Schnabeltiefe begünstigt Gentoo zusätzlich."
+            "🐧 **Erkenntnis für Gentoo:** Eine hohe Flossenlänge (`flipper_length_mm`) und eine hohe Körpermasse (`body_mass_g`) treiben die Modellvorhersage stark in Richtung Gentoo (rote Punkte weit rechts). Eine geringere Schnabeltiefe (`bill_depth_mm`) und hohe Schnabellänge (`bill_length_mm`) begünstigen die Entscheidung Gentoo zusätzlich."
         )
     elif selected_species == "Chinstrap":
         st.info(
-            "🐧 **Erkenntnis für Chinstrap (Zügelpinguin):** Eine lange Schnabellänge (`bill_length_mm`) in Kombination mit geringerer Körpermasse und moderaten Flossenlängen trennt Chinstrap sehr präzise von Adelie und Gentoo."
+            "🐧 **Erkenntnis für Chinstrap:** Eine lange Schnabellänge (`bill_length_mm`) treibt die Modellvorhersage stark in Richtung Chinstrap. Eine geringere Körpermasse (`body_mass_g`), geringe Flossenlängen (`flipper_length_mm`) und hohe Schnabeltiefe (`bill_depth_mm`) begünstigen die Entscheidung Gentoo zusätzlich."
         )
     else:  # Adelie
         st.info(
-            "🐧 **Erkenntnis für Adelie:** Kürzere Schnäbel (`bill_length_mm`) und kürzere Flossen sind das zentrale Erkennungsmerkmal für Adeliepinguine. Hohe Schnabellängen senken die Adelie-Wahrscheinlichkeit drastisch."
+            "🐧 **Hier" #TODO: Hier nach Vorbild der anderen beiden Spezien nachtragen 
         )
 
     # ------------------------------------------------ 3. Lokale Ergebnisse (Vergleich LIME)
     st.markdown("---")
-    st.markdown("### 3 · Interaktive lokale Ergebnisse: Einzelfall-Erklärung (Waterfall Plot)")
+    st.markdown("### Lokale Ergebnisse: Einzelfall-Erklärung")
     st.markdown(
         "Hier untersuchen wir konkrete Pinguine aus dem Testdatensatz. Wähle einen Test-Pinguin aus, um den exakten Zerlegungspfad der Entscheidung nachzuvollziehen:"
     )
@@ -441,11 +441,10 @@ $$
             "Pinguin-Instanz auswählen:",
             options=[
                 "Pinguin #4 (Tatsächlich: Gentoo) — Hohe Modellsicherheit",
-                "Pinguin #0 (Tatsächlich: Gentoo) — Typisches Exemplar",
-                "Pinguin #2 (Tatsächlich: Chinstrap) — Zügelpinguin",
-                "Pinguin #7 (Tatsächlich: Adelie) — Adeliepinguin",
-                "Pinguin #10 (Tatsächlich: Adelie) — Typisches Exemplar",
-                "Eigene Index-Eingabe...",
+                "Pinguin #0 (Tatsächlich: Gentoo)",
+                "Pinguin #2 (Tatsächlich: Chinstrap)",
+                "Pinguin #7 (Tatsächlich: Adelie)",
+                "Eigene Index-Eingabe...", #TODO: Gibt es sinnvollere Vorauswahlen? Vielleicht auch welche, bei denen das Modell falsch liegt? Mache 2 pro Spezies. Keine unnötigen Kommentare
             ],
             index=0,
         )
@@ -501,18 +500,16 @@ $$
 - Jeder rote Balken $(+)$ erhöht die Wahrscheinlichkeit für **{p_pred}**, jeder blaue Balken $(-)$ senkt sie.
 - Am Ende summiert sich alles exakt auf den finalen Ausgabewert $f(x) = {p_proba[p_pred_idx]:.2f}$.
 - **Unterschied zu LIME:** Während LIME eine *lokale Heuristik* über Zufallsstörungen trainiert, liefert SHAP eine *exakte, spieltheoretisch garantierte* additive Attribution.
-"""
+""" #TODO: Mache den UNterschied zu LIME klarer und verständlicher. Wir sind Anfänger und verstehen sowas nicht nacht drei Tagen Beschäftigung
     )
-
-    # ------------------------------------------------ 4. Limitationen
     st.markdown("---")
-    st.markdown("### 4 · Worin liegen die Limitations von SHAP?")
-    merkkasten(
+    st.markdown("### Limitationen von SHAP")
+    merkkasten( #TODO: Latex wird hier nicht erkannt. Fixen
         "Kritische Grenzen und Fallstricke von SHAP",
-        "1. <b>Erklärung des Modells $\\neq$ Erklärung der Wirklichkeit (Keine Kausalität):</b> SHAP erklärt ausschließlich die interne mathematische Funktionsweise des trainierten Modells. Wenn das Modell einen Scheinzusammenhang oder Confounder lernt, erhält dieser einen hohen SHAP-Wert, obwohl in der realen Biologie kein Kausaleffekt vorliegt.<br><br>"
-        "2. <b>Annahme unabhängiger Merkmale:</b> Standard-KernelSHAP permutiert Features unabhängig. Bei korrelierten Merkmalen (z. B. Flossenlänge und Körpergewicht) werden Koalitionen evaluiert, die in der Realität physikalisch unmöglich sind (z. B. 6 kg Pinguin mit 130 mm Flossen).<br><br>"
+        "1. <b>Erklärung des Modells $\\neq$ Erklärung der Wirklichkeit (Keine Kausalität):</b> SHAP erklärt ausschließlich die interne mathematische Funktionsweise des trainierten Modells. Wenn das Modell einen falschen Zusammenhang lernt, erhält dieser einen hohen SHAP-Wert, obwohl in der realen Biologie kein Kausaleffekt vorliegt.<br><br>"
+        "2. <b>Annahme unabhängiger Merkmale:</b> Features werden unabhängig permutiert. Bei korrelierten Merkmalen (z. B. Flossenlänge und Körpergewicht) werden Koalitionen evaluiert, die in der Realität physikalisch unmöglich sind (z. B. 6 kg Pinguin mit 130 mm Flossen).<br><br>"
         "3. <b>Rechenaufwand bei modellagnostischer Nutzung:</b> Für beliebige Blackbox-Modelle müssen bei $M$ Features potenziell alle $2^M$ Koalitionen berechnet werden. TreeSHAP umgeht dies für Entscheidungsbäume, ist jedoch an diese Modellklasse gebunden.<br><br>"
-        "4. <b>Multi-Class-Komplexität:</b> Da SHAP für jede Klasse separate Attributionswerte berechnet, kann die gleichzeitige Interpretation von 3 oder mehr Klassen für Anwender kognitiv anspruchsvoll sein.",
+        "4. <b>Multi-Class-Komplexität:</b> Da SHAP für jede Klasse separate Attributionswerte berechnet, kann die gleichzeitige Interpretation von 3 oder mehr Klassen schnell anspruchsvoll sein.",
         typ="achtung",
     )
 
