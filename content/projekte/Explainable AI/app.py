@@ -824,7 +824,48 @@ $$
 with tab_ausblick:
     st.markdown("## 6 · Ausblick: Andere Ansätze der Explainable AI")
     st.caption(
-        "Weitere globale und lokale Methoden zur Interpretation von KI-Modellen."
+        "Fazit und weitere globale und lokale Methoden zur Interpretation von KI-Modellen."
+    )
+    st.markdown("### Fazit: Was lernen wir aus LIME und SHAP?")
+
+    st.markdown(
+        """
+        LIME und SHAP bieten zwei Möglichkeiten, die Vorhersagen eines
+        Black-Box-Modells verständlicher zu machen. Sie können zeigen, welche
+        Merkmale für eine Vorhersage besonders relevant sind und damit einen
+        Einblick in das Verhalten des Modells geben.
+
+        Gleichzeitig sind solche Erklärungen nicht unbedingt eindeutig.
+        Unterschiedliche Methoden können einem Merkmal unterschiedliche
+        Beiträge zuweisen. Auch bei LIME kann sich die Erklärung beispielsweise
+        mit der Wahl der Kernel-Breite oder der zufälligen Perturbationen
+        verändern. Eine einzelne Erklärung sollte daher nicht als die
+        „wahre“ Begründung einer Modellentscheidung interpretiert werden.
+        """
+    )
+
+    st.info(
+        """
+        💡 **Eine XAI-Methode erklärt das Modell – nicht die Realität.**
+
+        Feature-Beiträge von LIME oder SHAP beschreiben, wie das Modell seine
+        Vorhersage aus den Eingabedaten konstruiert. Sie zeigen weder
+        automatisch kausale Zusammenhänge noch, was bei einer tatsächlichen
+        Änderung eines Merkmals passieren würde.
+
+        Für eine zuverlässige Interpretation ist es deshalb sinnvoll,
+        verschiedene Instanzen und – wenn möglich – verschiedene
+        Erklärungsverfahren miteinander zu vergleichen.
+        """
+    )
+
+    st.markdown(
+        """
+        Damit ist Explainable AI weniger eine Methode, mit der man eine
+        einzelne „richtige“ Erklärung erhält, sondern vielmehr ein Werkzeug,
+        um die Funktionsweise und mögliche Schwächen eines Modells kritisch
+        zu untersuchen.
+        """
     )
     st.markdown(
         """
@@ -880,9 +921,10 @@ with tab_ausblick:
         eine einzelne Vorhersage.
 
         Eine Übersicht und ausführlichere Erklärungen zu diesen Methoden
-        findest du [hier](LINK).
+        findest du hier:
         """
     )
+    st.page_link("views/ml/explainable_ml.py", label="Globale xAI", icon="🗂️")
 
     st.markdown("### Explainable AI für neuronale Netze")
 
