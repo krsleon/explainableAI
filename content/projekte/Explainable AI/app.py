@@ -117,3 +117,33 @@ with tab_daten:
 
     st.plotly_chart(fig, use_container_width=True)
     
+    
+#============================================================= LIME
+with tab_lime:
+    st.markdown("## 4 · LIME: Local Interpretable Model-agnostic Explanations")
+    st.caption(
+        "LIME ist eine Methode, die lokale Erklärungen für die Vorhersagen von Black-Box-Modellen liefert. "
+    )
+    st.markdown(
+        "Die Grundidee von LIME ist, dass wir ein komplexes Modell durch ein einfaches, interpretiertes Modell approximieren können, "
+        "das in der Nähe der Vorhersage des komplexen Modells gut funktioniert. "
+        "Dazu werden zufällige Perturbationen der Eingabedaten erzeugt und die Vorhersagen des Black-Box-Modells für diese Perturbationen gesammelt. "
+        "Anschließend wird ein einfaches Modell (z.B. lineares Modell, Decision Tree) auf diesen Daten trainiert, um die Vorhersage des Black-Box-Modells zu erklären."
+        "Es handelt sich um eine lokale Methode, da eine Erklärung nur für eine einzelne Vorhersage/Instanz - in unserem Beispiel für einen Pinguin - erzeugt wird, und nicht für das gesamte Modell."
+    )
+    #instance_idx = st.selectbox(
+    #"Penguin to explain",
+    #options=range(len(X_test)),
+    #index=7
+    #)
+    kernel_width = st.slider(
+    "Kernel width",
+    min_value=0.1,
+    max_value=5.0,
+    value=1.0,
+    step=0.1
+    )
+    st.markdown("## Weiterführende Literatur")
+    st.markdown(
+    "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier<b>, Ribeiro et al., 2016."
+        )
