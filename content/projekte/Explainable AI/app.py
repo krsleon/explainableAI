@@ -9,6 +9,7 @@ import os
 import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
+import pandas as pd
 
 # Der Projektordner liegt nicht automatisch im Suchpfad, weil Streamlit die
 # Seite aus dem Hauptverzeichnis heraus startet. Diese drei Zeilen braucht
