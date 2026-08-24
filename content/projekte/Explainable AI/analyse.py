@@ -12,6 +12,13 @@ import plotly.graph_objects as go
 ORDNER = Path(__file__).parent
 if str(ORDNER) not in sys.path:
     sys.path.insert(0, str(ORDNER))
+    
+standard_features = [
+        "bill_length_mm",
+        "bill_depth_mm",
+        "flipper_length_mm",
+        "body_mass_g"
+    ]
 
 def load_data():
     data = pd.read_csv(ORDNER/'penguins.csv')
@@ -20,12 +27,7 @@ def load_data():
 
 def train_blackbox(data, report=True):
     target = "species"
-    features = [
-        "bill_length_mm",
-        "bill_depth_mm",
-        "flipper_length_mm",
-        "body_mass_g"
-    ]
+    features = standard_features
     X = data[features]
     Y = data[target]
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
@@ -36,7 +38,7 @@ def train_blackbox(data, report=True):
         print(classification_report(y_test, y_pred))
     return model, X_test, y_test
 
-def create_lime_explainer(model, data, features, kernel_width):
+def create_lime_explainer(model, data, kernel_width,features=standard_features):
     # Create a LIME explainer
     explainer = lime.lime_tabular.LimeTabularExplainer(
         training_data=data[features].values,

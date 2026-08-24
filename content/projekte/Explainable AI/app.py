@@ -136,6 +136,7 @@ with tab_lime:
     instance_idx = st.selectbox(
     "Penguin to explain",
     options=range(len(X_test)),
+    # von jeder Art drei zur Auswahl geben.
     index=7
     )
     instance_to_explain = X_test.iloc[instance_idx].to_numpy()
@@ -162,6 +163,59 @@ with tab_lime:
     value=1.0,
     step=0.1
     )
+    explainer = analyse.create_lime_explainer(model, data, kernel_width)
+    explanation = analyse.explain_instance(explainer, model, instance_to_explain)
+    lime_values = explanation.as_list()
+    
+    # Convert LIME output into a DataFrame
+    lime_df = pd.DataFrame(
+        lime_values,
+        columns=["Feature", "Contribution"]
+    )
+
+    # Sort so the strongest contributions appear at the top
+    lime_df = lime_df.sort_values(
+        "Contribution",
+        ascending=True
+    )
+
+    fig = px.bar(
+        lime_df,
+        x="Contribution",
+        y="Feature",
+        orientation="h",
+        title=f"LIME explanation — {predicted_class}",
+        labels={
+            "Contribution": "Contribution to prediction",
+            "Feature": "Feature"
+        }
+    )
+
+    # Add vertical line at zero
+    fig.add_vline(
+        x=0,
+        line_width=2
+    )
+
+    fig.update_layout(
+        height=400,
+        showlegend=False
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+    
+    fig.update_layout(
+    title=(
+        f"LIME explanation for {predicted_class}"
+        f"<br><sup>Kernel width = {kernel_width}</sup>"
+    ),
+    height=400,
+    showlegend=False
+    )
+    
     
     st.markdown("## Weiterführende Literatur")
     st.markdown(
