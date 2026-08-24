@@ -7,6 +7,7 @@ from pathlib import Path
 import os
 
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 
 # Der Projektordner liegt nicht automatisch im Suchpfad, weil Streamlit die
@@ -80,4 +81,36 @@ with tab_daten:
     st.markdown(
         "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen."
     )
+    numeric_features = [
+    "bill_length_mm",
+    "bill_depth_mm",
+    "flipper_length_mm",
+    "body_mass_g"
+    ]
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        x_feature = st.selectbox(
+            "x-axis",
+            numeric_features,
+            index=0
+        )
+
+    with col2:
+        y_feature = st.selectbox(
+            "y-axis",
+            numeric_features,
+            index=3
+        )
+
+    fig = px.scatter(
+        data,
+        x=x_feature,
+        y=y_feature,
+        color="species",
+        hover_data=["sex", "island"],
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
     
