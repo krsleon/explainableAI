@@ -49,24 +49,43 @@ tab_intro, tab_daten, tab_blackbox, tab_lime, tab_shap, tab_ausblick = st.tabs(
 #============================================================= Intro to xAI
 with tab_intro:
     st.markdown("## 1 · Einleitung: Explainable AI")
-    st.caption(
+    st.markdown(
         "Explainable AI (xAI) ist ein Forschungsgebiet, das sich mit der Nachvollziehbarkeit von Entscheidungen von KI-Modellen beschäftigt. "
         "Es geht darum, die Funktionsweise von Modellen zu verstehen und ihre Entscheidungen zu erklären."
         "Dazu gibt es verschiedene Herangehensweisen, die schematisch in der folgenden Abbildung dargestellt werden."
     )
     st.image(os.path.join(ORDNER, "images", "xAI_overview.png"), caption="Abbildung 1: Überblick über Explainable AI Methoden")
-    #st.markdown(
-    #"""
-    #<div style="text-align: center;">
-    #    <img src="images/xAI_overview.png" width="500">
-    #</div>
-    #""",
-    #unsafe_allow_html=True
-#)
-    st.markdown(
-        "In diesem Projekt werden wir uns auf zwei Methoden konzentrieren: LIME (Local Interpretable Model-agnostic Explanations) und SHAP (SHapley Additive exPlanations). "
-        "Beide Methoden sind darauf ausgelegt, die Vorhersagen von Black-Box-Modellen zu erklären."
+    st.markdown(" Die erste Unterscheidung in der Grafik meint den Unterschied zwischen intrinsisch interpretierbaren Modellen (z. B. lineare Regression, Entscheidungsbäume) und post-hoc Methoden"
+                ", die im Nachhinein auf kompliziertere Modelle (z. B. Random Forest, Neural Networks) angewendet werden können."
+            "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind, sie sind also erklärbar by design."
+        "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
     )
+    st.markdown(
+        "Aus diesem Grund spricht man von *Blackbox-Modellen*. "
+    )
+    st.markdown(
+        """
+        ## Darum suchen wir Ansätze, um Ergebnisse interpretierbar zu machen...
+
+        Ein reines Vorhersageergebnis reicht in der Praxis selten aus:
+        - **Vertrauen & Validierung:** Trifft das Modell Entscheidungen anhand biologisch plausibler Merkmale oder verlässt es sich auf zufällige Artefakte im Datensatz?
+        - **Fehlersuche & Debugging:** Warum wurde ein bestimmter Pinguin falsch klassifiziert? Welches Merkmal hat den Ausschlag gegeben?
+        - **Verantwortung & Nachvollziehbarkeit:** In kritischen Anwendungen müssen Entscheidungen gegenüber Anwendern und Regulatoren begründet werden können.
+
+        Um den Konflikt zwischen hoher Vorhersageleistung und mangelnder Transparenz aufzulösen, setzt **Explainable AI (XAI)** unter anderem auf *modellagnostische Post-Hoc-Erklärungen*, also Verfahren, die auf beliebige Modelle angewandt werden können. 
+        Dabei wird das Verhalten der Black Box von außen beobachtet und analysiert – wie in den folgenden Tabs an zwei führenden Verfahren demonstriert wird:
+        """
+    )
+
+    merkkasten(
+        "Ansätze für mehr Erklärbarkeit",
+        "• <b>LIME (Tab 4):</b> Erklärt einzelne Vorhersagen lokal durch ein einfaches lineares Ersatzmodell in der direkten Nachbarschaft eines Datenpunkts.<br>"
+        "• <b>SHAP (Tab 5):</b> Nutzt Konzepte der kooperativen Spieltheorie, um den exakten, fairen Beitrag jedes einzelnen Merkmals zur Entscheidung zu quantifizieren.",
+        typ="definition",
+    )
+    
+    st.markdown("LIME und SHAP sind lokale Methoden, die Auskunft über die Entscheidung eines Modells in der Nähe eines bestimmten Datenpunkts geben. Die modell-agnostischen Methoden können auch global sein und Auskunft über das Gesamtverhalten des Modells geben. ")
+    st.markdown("Es existieren auch modell-spezifische Ansätze, die auf bestimmte Modelltypen zugeschnitten sind, z. B. neuronale Netze oder Entscheidungsbäume. Diese werden in Tab 6 kurz vorgestellt.")
 
 
 #============================================================= Daten
@@ -80,7 +99,7 @@ with tab_daten:
     st.markdown(
         "Die Daten enthalten die folgenden Spalten: `species`, `island`, `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`, `sex`."
     )
-    st.dataframe(data.sample(10, random_state=42))
+    st.dataframe(data.sample(7, random_state=42))
     st.markdown(
         "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen. "
         "Im Plot unten können wir die Verteilung der Pinguinarten in Abhängigkeit von zwei ausgewählten Features visualisieren."
@@ -124,38 +143,9 @@ with tab_daten:
 #============================================================= Blackbox-Modell
 with tab_blackbox:
     st.markdown("## 3 · Das Blackbox-Modell")
-    st.markdown(
-        "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind."
-    )
-    st.markdown(
-        "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
-    )
-    st.markdown(
-        "Aus diesem Grund spricht man von *Blackbox-Modellen*."
-    )
-
-   
-
-    st.markdown(
-        """
-        ## Darum suchen wir Ansätze, um Ergebnisse interpretierbar zu machen...
-
-        Ein reines Vorhersageergebnis reicht in der Praxis selten aus:
-        - **Vertrauen & Validierung:** Trifft das Modell Entscheidungen anhand biologisch plausibler Merkmale oder verlässt es sich auf zufällige Artefakte im Datensatz?
-        - **Fehlersuche & Debugging:** Warum wurde ein bestimmter Pinguin falsch klassifiziert? Welches Merkmal hat den Ausschlag gegeben?
-        - **Verantwortung & Nachvollziehbarkeit:** In kritischen Anwendungen müssen Entscheidungen gegenüber Anwendern und Regulatoren begründet werden können.
-
-        Um den Konflikt zwischen hoher Vorhersageleistung und mangelnder Transparenz aufzulösen, setzt **Explainable AI (XAI)** auf *modellagnostische Post-Hoc-Erklärungen*. 
-        Dabei wird das Verhalten der Black Box von außen beobachtet und analysiert – wie in den folgenden Tabs an zwei führenden Verfahren demonstriert wird:
-        """
-    )
-
-    merkkasten(
-        "Ansätze für mehr Erklärbarkeit",
-        "• <b>LIME (Tab 4):</b> Erklärt einzelne Vorhersagen lokal durch ein einfaches lineares Ersatzmodell in der direkten Nachbarschaft eines Datenpunkts.<br>"
-        "• <b>SHAP (Tab 5):</b> Nutzt Konzepte der kooperativen Spieltheorie, um den exakten, fairen Beitrag jedes einzelnen Merkmals zur Entscheidung zu quantifizieren.",
-        typ="definition",
-    )
+    st.markdown("Wir trainieren ein Random Forest Modell, um die Art der Pinguine anhand der vier ausgewählten Features vorherzusagen. "
+                "Dafur verwenden wir die sklearn Bibliothek. Das Modell wird auf 70% der Daten trainiert und auf den restlichen 30% getestet. ")
+    
 
 
 #============================================================= LIME
@@ -171,6 +161,98 @@ with tab_lime:
         "Anschließend wird ein einfaches Modell (z.B. lineares Modell, Decision Tree) auf diesen Daten trainiert, um die Vorhersage des Black-Box-Modells zu erklären."
         "Es handelt sich um eine lokale Methode, da eine Erklärung nur für eine einzelne Vorhersage/Instanz - in unserem Beispiel für einen Pinguin - erzeugt wird, und nicht für das gesamte Modell."
     )
+    
+    st.markdown("### Mathematische Grundlagen von LIME")
+
+st.markdown(
+    r"""
+    Für eine einzelne Instanz $x$ versucht LIME, das Verhalten des komplexen
+    Black-Box-Modells $f$ in einer lokalen Umgebung durch ein einfaches,
+    interpretierbares Modell $g$ zu approximieren. Für unsere Anwendung ist
+    $f$ der Random Forest und $x$ ein einzelner Pinguin.
+
+    Als einfaches Erklärungsmodell kann beispielsweise ein lineares Modell
+    verwendet werden:
+    """
+)
+
+st.latex(
+    r"""
+    g(x') = \beta_0 + \sum_{j=1}^{p} \beta_j x'_j .
+    """
+)
+
+st.markdown(
+    r"""
+    Dabei beschreibt $x'$ die Merkmale einer (möglicherweise perturbierten)
+    Instanz und $\beta_j$ gibt an, welchen lokalen Einfluss das Merkmal
+    $j$ auf die Vorhersage des Surrogatmodells hat. Ein großer Betrag
+    $|\beta_j|$ bedeutet somit einen starken lokalen Einfluss. Das Vorzeichen
+    gibt die Richtung des Einflusses an: Ein positiver Koeffizient unterstützt
+    die betrachtete Klasse, ein negativer Koeffizient spricht gegen sie.
+
+    Wichtig ist dabei, dass diese Koeffizienten <b>keine globalen
+    Feature-Importances des Random Forests</b> sind. Sie beschreiben nur,
+    wie das vereinfachte Modell das Verhalten des Random Forests in der
+    Umgebung der ausgewählten Instanz approximiert.
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    r"""
+    Um die lokale Umgebung zu erzeugen, verändert LIME die Merkmale der
+    ursprünglichen Instanz und lässt das Black-Box-Modell die erzeugten
+    Datenpunkte klassifizieren. Datenpunkte, die näher an der ursprünglichen
+    Instanz liegen, sollen dabei stärker zur lokalen Erklärung beitragen.
+    """
+)
+
+st.markdown("#### Kernel und Kernel-Breite")
+
+st.markdown(
+    r"""
+    Die Nähe eines perturbierten Datenpunkts $x'$ zur ursprünglichen Instanz
+    $x$ wird durch einen Kernel gewichtet. Vereinfacht kann man sich die
+    Gewichtsfunktion als
+    """
+)
+
+st.latex(
+    r"""
+    \pi_x(x') =
+    \exp\left(
+    -\frac{D(x,x')^2}{\sigma^2}
+    \right)
+    """
+)
+
+st.markdown(
+    r"""
+    vorstellen. Hier bezeichnet $D(x,x')$ einen Distanzmaß zwischen den
+    beiden Instanzen und $\sigma$ die <b>Kernel-Breite</b>
+    (<i>kernel width</i>).
+
+    Die Kernel-Breite bestimmt damit, wie groß die lokale Umgebung ist:
+    """
+)
+
+st.markdown(
+    r"""
+    - **Kleine Kernel-Breite:** Nur Datenpunkte, die sehr nahe an der
+      ursprünglichen Instanz liegen, erhalten ein hohes Gewicht.
+      Die Erklärung ist dadurch stärker lokalisiert.
+    - **Große Kernel-Breite:** Auch weiter entfernte Datenpunkte erhalten
+      noch ein relevantes Gewicht. Die Erklärung berücksichtigt dadurch
+      einen größeren Bereich des Datenraums.
+
+    Die Wahl der Kernel-Breite beeinflusst daher direkt die resultierende
+    Erklärung. Es gibt nicht notwendigerweise eine einzige, eindeutig
+    "richtige" lokale Erklärung.
+    """,
+    unsafe_allow_html=True
+)
+    
     if "lime_instance_idx" not in st.session_state:
         st.session_state["lime_instance_idx"] = 7
 
@@ -188,7 +270,7 @@ with tab_lime:
         if st.session_state["lime_instance_idx"] < len(X_test) - 1:
             st.session_state["lime_instance_idx"] += 1
 
-    st.markdown("### Pinguin auswählen")
+    st.markdown("### Ihr seid dran: LIME-Vorhersage für einen Pinguin")
     col_prev, col_num, col_next = st.columns([1, 2, 1], vertical_alignment="center")
 
     with col_prev:
@@ -298,6 +380,81 @@ with tab_lime:
     ),
     height=400,
     showlegend=False
+    )
+    
+    st.markdown("ADD INTERPRETATION OF THE RESULTS")
+    
+    st.markdown("### Stärken und Schwächen von LIME")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.success(
+        """
+        **✓ Stärken**
+
+        - **Modellunabhängig:** LIME benötigt keinen direkten Zugriff auf
+          die interne Struktur des Black-Box-Modells.
+
+        - **Lokale Erklärungen:** Es erklärt konkrete einzelne
+          Vorhersagen und kann dadurch sehr detaillierte Einzelfälle
+          untersuchen.
+
+        - **Intuitiv:** Die Beiträge einzelner Merkmale können als
+          positive oder negative Gewichte dargestellt werden.
+
+        - **Vielseitig:** Das Grundprinzip kann auf unterschiedliche
+          Datentypen und Modelle angewendet werden.
+
+        - **Einfach visualisierbar:** Die lokalen Feature-Beiträge lassen
+          sich beispielsweise als Balkendiagramm darstellen.
+        """
+    )
+
+with col2:
+    st.warning(
+        """
+        **⚠ Schwächen**
+
+        - **Lokale Methode:** Eine Erklärung für einen Pinguin sagt
+          nicht automatisch etwas über andere Pinguine aus.
+
+        - **Abhängigkeit von Hyperparametern:** Die Erklärung kann sich
+          beispielsweise mit der Kernel-Breite oder der Anzahl der
+          erzeugten Perturbationen verändern.
+
+        - **Stochastisch:** Durch die zufällige Erzeugung von
+          Perturbationen können sich Erklärungen zwischen verschiedenen
+          Läufen unterscheiden.
+
+        - **Surrogatmodell ist nur eine Approximation:** Das einfache
+          Modell muss das Black-Box-Modell nicht außerhalb der lokalen
+          Umgebung korrekt beschreiben.
+
+        - **Keine Kausalität:** Ein hoher Feature-Beitrag bedeutet nicht,
+          dass dieses Merkmal die Vorhersage kausal verursacht.
+        """
+    )
+    st.info(
+    """
+    💡 **LIME ist nicht auf Tabellendaten beschränkt**
+
+    LIME wurde als allgemeines, modellunabhängiges Erklärungsverfahren
+    konzipiert. Das Grundprinzip kann auf verschiedene Datentypen
+    angewendet werden.
+
+    **Tabellendaten:** Einzelne Merkmale einer Instanz werden perturbiert.
+    In unserem Beispiel sind dies z.B. Schnabellänge, Schnabeltiefe,
+    Flossenlänge und Körpermasse.
+
+    **Text:** Wörter bzw. Wortbestandteile können entfernt oder verändert
+    werden. LIME untersucht dann, welche Wörter besonders stark zur
+    Klassifikation eines Textes beitragen.
+
+    **Bilder:** Bildbereiche bzw. Superpixel können verändert oder
+    ausgeblendet werden. So lässt sich untersuchen, welche Bildregionen
+    für eine Klassifikation besonders relevant sind.
+    """
     )
     
     
