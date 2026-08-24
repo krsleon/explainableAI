@@ -48,14 +48,15 @@ with tab_intro:
         "Es geht darum, die Funktionsweise von Modellen zu verstehen und ihre Entscheidungen zu erklären."
         "Dazu gibt es verschiedene Herangehensweisen, die schematisch in der folgenden Abbildung dargestellt werden."
     )
-    st.markdown(
-    """
-    <div style="text-align: center;">
-        <img src="images/xAI_overview.png" width="500">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+    st.image(images/xAI_overview.png, caption="Abbildung 1: Überblick über Explainable AI Methoden", use_column_width=True)
+    #st.markdown(
+    #"""
+    #<div style="text-align: center;">
+    #    <img src="images/xAI_overview.png" width="500">
+    #</div>
+    #""",
+    #unsafe_allow_html=True
+#)
     st.markdown(
         "In diesem Projekt werden wir uns auf zwei Methoden konzentrieren: LIME (Local Interpretable Model-agnostic Explanations) und SHAP (SHapley Additive exPlanations). "
         "Beide Methoden sind darauf ausgelegt, die Vorhersagen von Black-Box-Modellen zu erklären."
