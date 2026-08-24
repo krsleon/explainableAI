@@ -7,6 +7,7 @@ from pathlib import Path
 import os
 
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 
 # Der Projektordner liegt nicht automatisch im Suchpfad, weil Streamlit die
@@ -76,18 +77,83 @@ with tab_daten:
     st.markdown(
         "Die Daten enthalten die folgenden Spalten: `species`, `island`, `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`, `sex`."
     )
-    
+    st.dataframe(data.sample(10, random_state=42))
     st.markdown(
-        "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen."
+        "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen. "
+        "Im Plot unten können wir die Verteilung der Pinguinarten in Abhängigkeit von zwei ausgewählten Features visualisieren."
+        "Es fällt auf, dass die Arten je nach ausgewählten Features unterschiedlich gut trennbar sind. "
+        "Unser Blackbox-Modell soll die Art der Pinguine anhand der Features vorhersagen, und wir wollen danach nachvollziehen, warum eine bestimmte Klassifikation stattgefunden hat."
+    )
+    numeric_features = [
+    "bill_length_mm",
+    "bill_depth_mm",
+    "flipper_length_mm",
+    "body_mass_g"
+    ]
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        x_feature = st.selectbox(
+            "x-axis",
+            numeric_features,
+            index=0
+        )
+
+    with col2:
+        y_feature = st.selectbox(
+            "y-axis",
+            numeric_features,
+            index=3
+        )
+
+    fig = px.scatter(
+        data,
+        x=x_feature,
+        y=y_feature,
+        color="species",
+        hover_data=["sex", "island"],
     )
 
-with tab_blackbox:
-    st.markdown(
-        "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind."
+    st.plotly_chart(fig, use_container_width=True)
+    
+    
+#============================================================= LIME
+with tab_lime:
+    st.markdown("## 4 · LIME: Local Interpretable Model-agnostic Explanations")
+    st.caption(
+        "LIME ist eine Methode, die lokale Erklärungen für die Vorhersagen von Black-Box-Modellen liefert. "
     )
     st.markdown(
-        "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
+        "Die Grundidee von LIME ist, dass wir ein komplexes Modell durch ein einfaches, interpretiertes Modell approximieren können, "
+        "das in der Nähe der Vorhersage des komplexen Modells gut funktioniert. "
+        "Dazu werden zufällige Perturbationen der Eingabedaten erzeugt und die Vorhersagen des Black-Box-Modells für diese Perturbationen gesammelt. "
+        "Anschließend wird ein einfaches Modell (z.B. lineares Modell, Decision Tree) auf diesen Daten trainiert, um die Vorhersage des Black-Box-Modells zu erklären."
+        "Es handelt sich um eine lokale Methode, da eine Erklärung nur für eine einzelne Vorhersage/Instanz - in unserem Beispiel für einen Pinguin - erzeugt wird, und nicht für das gesamte Modell."
     )
+    #instance_idx = st.selectbox(
+    #"Penguin to explain",
+    #options=range(len(X_test)),
+    #index=7
+    #)
+    kernel_width = st.slider(
+    "Kernel width",
+    min_value=0.1,
+    max_value=5.0,
+    value=1.0,
+    step=0.1
+    )
+    st.markdown("## Weiterführende Literatur")
     st.markdown(
-        "Aus diesem Grund spricht man von *Blackbox-Modellen*."
-    )
+    "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier<b>, Ribeiro et al., 2016."
+        )
+    with tab_blackbox:
+        st.markdown(
+            "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind."
+        )
+        st.markdown(
+            "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
+        )
+        st.markdown(
+            "Aus diesem Grund spricht man von *Blackbox-Modellen*."
+        )
