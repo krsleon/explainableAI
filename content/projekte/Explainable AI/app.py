@@ -10,6 +10,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
 import pandas as pd
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 # Der Projektordner liegt nicht automatisch im Suchpfad, weil Streamlit die
 # Seite aus dem Hauptverzeichnis heraus startet. Diese drei Zeilen braucht
@@ -22,7 +23,7 @@ import analyse  # noqa: E402  (erst nach dem sys.path-Eintrag importierbar)
 from utils.theming import FARBEN, merkkasten
 
 data = analyse.load_data()
-model, X_test, y_test = analyse.train_blackbox(data, report=False)
+model, X_test, y_test, y_pred = analyse.train_blackbox(data, report=False)
 
 st.markdown("# Explainable AI: Wie können wir Black-Box Modelle verstehen?")
 st.caption(
@@ -145,6 +146,73 @@ with tab_blackbox:
     st.markdown("## 3 · Das Blackbox-Modell")
     st.markdown("Wir trainieren ein Random Forest Modell, um die Art der Pinguine anhand der vier ausgewählten Features vorherzusagen. "
                 "Dafur verwenden wir die sklearn Bibliothek. Das Modell wird auf 70% der Daten trainiert und auf den restlichen 30% getestet. ")
+    accuracy = accuracy_score(y_test, y_pred)
+
+    st.metric(
+        "Accuracy",
+        f"{accuracy:.1%}"
+    )
+    cm = confusion_matrix(
+    y_test,
+    y_pred,
+    labels=model.classes_
+    )
+
+    fig_cm = px.imshow(
+        cm,
+        x=model.classes_,
+        y=model.classes_,
+        text_auto=True,
+        labels={
+            "x": "Vorhergesagte Spezies",
+            "y": "Tatsächliche Spezies",
+            "color": "Anzahl"
+        },
+        title="Confusion Matrix"
+    )
+
+    fig_cm.update_layout(
+        height=400
+    )
+
+    st.plotly_chart(
+        fig_cm,
+        use_container_width=True
+    )
+    importance_df = pd.DataFrame({
+    "Feature": analyse.standard_features,
+    "Importance": model.feature_importances_
+    }).sort_values(
+        "Importance",
+        ascending=True
+    )
+    fig_importance = px.bar(
+    importance_df,
+    x="Importance",
+    y="Feature",
+    orientation="h",
+    text="Importance",
+    title="Feature Importance des Random Forests",
+    labels={
+        "Importance": "Importance",
+        "Feature": "Feature"
+    }
+    )
+    
+    fig_importance.update_traces(
+        texttemplate="%{text:.3f}",
+        textposition="outside"
+    )
+    
+    fig_importance.update_layout(
+        xaxis_range=[0, importance_df["Importance"].max() * 1.15],
+        height=400
+    )
+    
+    st.plotly_chart(
+        fig_importance,
+        use_container_width=True
+    )
     
 
 
@@ -170,18 +238,18 @@ with tab_lime:
         Black-Box-Modells $f$ in einer lokalen Umgebung durch ein einfaches,
         interpretierbares Modell $g$ zu approximieren. Für unsere Anwendung ist
         $f$ der Random Forest und $x$ ein einzelner Pinguin.
-    
+
         Als einfaches Erklärungsmodell kann beispielsweise ein lineares Modell
         verwendet werden:
         """
     )
-    
+
     st.latex(
         r"""
         g(x') = \beta_0 + \sum_{j=1}^{p} \beta_j x'_j .
         """
     )
-    
+
     st.markdown(
         r"""
         Dabei beschreibt $x'$ die Merkmale einer (möglicherweise perturbierten)
@@ -190,7 +258,7 @@ with tab_lime:
         $|\beta_j|$ bedeutet somit einen starken lokalen Einfluss. Das Vorzeichen
         gibt die Richtung des Einflusses an: Ein positiver Koeffizient unterstützt
         die betrachtete Klasse, ein negativer Koeffizient spricht gegen sie.
-    
+
         Wichtig ist dabei, dass diese Koeffizienten <b>keine globalen
         Feature-Importances des Random Forests</b> sind. Sie beschreiben nur,
         wie das vereinfachte Modell das Verhalten des Random Forests in der
@@ -198,7 +266,7 @@ with tab_lime:
         """,
         unsafe_allow_html=True
     )
-    
+
     st.markdown(
         r"""
         Um die lokale Umgebung zu erzeugen, verändert LIME die Merkmale der
@@ -207,9 +275,38 @@ with tab_lime:
         Instanz liegen, sollen dabei stärker zur lokalen Erklärung beitragen.
         """
     )
-    
+    st.markdown("#### Optimierungsproblem von LIME")
+    st.markdown(
+    r"""
+    LIME sucht dabei ein möglichst einfaches Modell $g$, das das Verhalten
+    des Black-Box-Modells $f$ in der lokalen Umgebung von $x$ gut beschreibt:
+
+    """
+    )
+
+    st.latex(
+        r"""
+        \xi(x)
+        =
+        \underset{g\in G}{\operatorname{arg\,min}}
+        \left[
+            L(f,g,\pi_x) + \Omega(g)
+        \right].
+        """
+    )
+
+    st.markdown(
+        r"""
+        Dabei misst $L(f,g,\pi_x)$, wie gut das Surrogatmodell $g$ das
+        Black-Box-Modell in der lokalen Umgebung reproduziert, während
+        $\Omega(g)$ die Komplexität des Erklärungsmodells bestraft.
+        LIME sucht also einen Kompromiss zwischen **Genauigkeit der lokalen
+        Approximation** und **Einfachheit der Erklärung**.
+        """
+    )
+
     st.markdown("#### Kernel und Kernel-Breite")
-    
+
     st.markdown(
         r"""
         Die Nähe eines perturbierten Datenpunkts $x'$ zur ursprünglichen Instanz
@@ -217,7 +314,7 @@ with tab_lime:
         Gewichtsfunktion als
         """
     )
-    
+
     st.latex(
         r"""
         \pi_x(x') =
@@ -226,17 +323,17 @@ with tab_lime:
         \right)
         """
     )
-    
+
     st.markdown(
         r"""
         vorstellen. Hier bezeichnet $D(x,x')$ einen Distanzmaß zwischen den
         beiden Instanzen und $\sigma$ die <b>Kernel-Breite</b>
         (<i>kernel width</i>).
-    
+
         Die Kernel-Breite bestimmt damit, wie groß die lokale Umgebung ist:
         """
     )
-    
+
     st.markdown(
         r"""
         - **Kleine Kernel-Breite:** Nur Datenpunkte, die sehr nahe an der
@@ -245,14 +342,14 @@ with tab_lime:
         - **Große Kernel-Breite:** Auch weiter entfernte Datenpunkte erhalten
           noch ein relevantes Gewicht. Die Erklärung berücksichtigt dadurch
           einen größeren Bereich des Datenraums.
-    
+
         Die Wahl der Kernel-Breite beeinflusst daher direkt die resultierende
         Erklärung. Es gibt nicht notwendigerweise eine einzige, eindeutig
         "richtige" lokale Erklärung.
         """,
         unsafe_allow_html=True
     )
-        
+
     if "lime_instance_idx" not in st.session_state:
         st.session_state["lime_instance_idx"] = 7
 
@@ -373,7 +470,9 @@ with tab_lime:
         use_container_width=True,
     )
     
-    st.markdown("ADD INTERPRETATION OF THE RESULTS")
+    st.markdown("Im Beispiel könnt ihr sehen, dass die Kernelbreite die Bedeutung der einzelnen Features für die Vorhersage verändert."
+                "Bei zu geringer Kernelbreite kann überhaupt keine signifikante Kontribution festgestellt werden (Werte von $10^{-21}$)."
+                "Teilweise ändern sich die aufgeführten wichtigsten Features bei steigender Kernelbreite.")
     
     st.markdown("### Stärken und Schwächen von LIME")
 

@@ -36,7 +36,7 @@ def train_blackbox(data, report=True):
     y_pred = model.predict(X_test)
     if report:
         print(classification_report(y_test, y_pred))
-    return model, X_test, y_test
+    return model, X_test, y_test, y_pred
 
 def create_lime_explainer(model, data, kernel_width,features=standard_features):
     # Create a LIME explainer
