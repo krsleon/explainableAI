@@ -171,12 +171,54 @@ with tab_lime:
         "Anschließend wird ein einfaches Modell (z.B. lineares Modell, Decision Tree) auf diesen Daten trainiert, um die Vorhersage des Black-Box-Modells zu erklären."
         "Es handelt sich um eine lokale Methode, da eine Erklärung nur für eine einzelne Vorhersage/Instanz - in unserem Beispiel für einen Pinguin - erzeugt wird, und nicht für das gesamte Modell."
     )
-    instance_idx = st.selectbox(
-    "Penguin to explain",
-    options=range(len(X_test)),
-    # von jeder Art drei zur Auswahl geben.
-    index=7
-    )
+    if "lime_instance_idx" not in st.session_state:
+        st.session_state["lime_instance_idx"] = 7
+
+    # Bounds check
+    if st.session_state["lime_instance_idx"] < 0:
+        st.session_state["lime_instance_idx"] = 0
+    elif st.session_state["lime_instance_idx"] >= len(X_test):
+        st.session_state["lime_instance_idx"] = len(X_test) - 1
+
+    def _prev_penguin():
+        if st.session_state["lime_instance_idx"] > 0:
+            st.session_state["lime_instance_idx"] -= 1
+
+    def _next_penguin():
+        if st.session_state["lime_instance_idx"] < len(X_test) - 1:
+            st.session_state["lime_instance_idx"] += 1
+
+    st.markdown("### Pinguin auswählen")
+    col_prev, col_num, col_next = st.columns([1, 2, 1], vertical_alignment="center")
+
+    with col_prev:
+        st.button(
+            "◀ Vorheriger",
+            key="lime_btn_prev",
+            on_click=_prev_penguin,
+            disabled=(st.session_state["lime_instance_idx"] <= 0),
+            use_container_width=True,
+        )
+
+    with col_num:
+        st.markdown(
+            f"<div style='text-align: center;'>"
+            f"<span style='font-size: 1.8rem; font-weight: 700;'>Pinguin #{st.session_state['lime_instance_idx']}</span>"
+            f"<br><span style='font-size: 0.85rem; color: #888;'>Index {st.session_state['lime_instance_idx']} von {len(X_test) - 1}</span>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+    with col_next:
+        st.button(
+            "Nächster ▶",
+            key="lime_btn_next",
+            on_click=_next_penguin,
+            disabled=(st.session_state["lime_instance_idx"] >= len(X_test) - 1),
+            use_container_width=True,
+        )
+
+    instance_idx = st.session_state["lime_instance_idx"]
     instance_to_explain = X_test.iloc[instance_idx].to_numpy()
 
     actual_class = y_test.iloc[instance_idx]
@@ -222,7 +264,6 @@ with tab_lime:
         x="Contribution",
         y="Feature",
         orientation="h",
-        title=f"LIME explanation — {predicted_class}",
         labels={
             "Contribution": "Contribution to prediction",
             "Feature": "Feature"
@@ -236,6 +277,10 @@ with tab_lime:
     )
 
     fig.update_layout(
+        title=(
+            f"LIME explanation for {predicted_class}"
+            f"<br><sup>Kernel width = {kernel_width}</sup>"
+        ),
         height=400,
         showlegend=False
     )
@@ -243,15 +288,6 @@ with tab_lime:
     st.plotly_chart(
         fig,
         use_container_width=True
-    )
-    
-    fig.update_layout(
-    title=(
-        f"LIME explanation for {predicted_class}"
-        f"<br><sup>Kernel width = {kernel_width}</sup>"
-    ),
-    height=400,
-    showlegend=False
     )
     
     
