@@ -44,7 +44,7 @@ tab_intro, tab_daten, tab_blackbox, tab_lime, tab_shap, tab_ausblick = st.tabs(
         "3 · Das Blackbox-Modell",
         "4 · LIME",
         "5 · SHAP",
-        "6 · Ausblick: Andere Möglichkeiten",
+        "6 · Ausblick",
     ]
 )
 #============================================================= Intro to xAI
@@ -56,13 +56,15 @@ with tab_intro:
         "Dazu gibt es verschiedene Herangehensweisen, die schematisch in der folgenden Abbildung dargestellt werden."
     )
     st.image(os.path.join(ORDNER, "images", "xAI_overview.png"), caption="Abbildung 1: Überblick über Explainable AI Methoden")
-    st.markdown(" Die erste Unterscheidung in der Grafik meint den Unterschied zwischen intrinsisch interpretierbaren Modellen (z. B. lineare Regression, Entscheidungsbäume) und post-hoc Methoden"
-                ", die im Nachhinein auf kompliziertere Modelle (z. B. Random Forest, Neural Networks) angewendet werden können."
-            "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind, sie sind also erklärbar by design."
+    st.markdown(
+        " Die erste Unterscheidung in der Grafik meint den Unterschied zwischen intrinsisch interpretierbaren Modellen (z. B. lineare Regression, Entscheidungsbäume) und post-hoc Methoden, die im Nachhinein auf kompliziertere Modelle (z. B. Random Forest, Neural Networks) angewendet werden können."
+    )
+    st.markdown(
+        "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind, sie sind also erklärbar by design."
         "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
     )
     st.markdown(
-        "Aus diesem Grund spricht man von *Blackbox-Modellen*. "
+        "Man spricht dabei von *Blackbox-Modellen*. "
     )
     st.markdown(
         """
@@ -797,7 +799,166 @@ $$
 
 #============================================================= Ausblick
 with tab_ausblick:
-    st.markdown("## 6 · Ausblick: Andere Ansätze der Explainable AI")
+    st.markdown("## 6 · Ausblick: Weitere Ansätze der Explainable AI")
     st.caption(
-        "Weitere globale und lokale Methoden zur Interpretation von KI-Modellen."
+        "Ein Überblick über moderne Forschungsrichtungen: Von inhärent interpretierbaren Modellen (By Design) bis zu fortgeschrittenen Post-Hoc Methoden."
+    )
+
+    st.markdown(
+        """
+        **LIME** und **SHAP** sind zwei prominente, *modellagnostische Post-Hoc-Verfahren*.
+        Das Forschungsfeld **Explainable AI (XAI)** ist jedoch deutlich breiter gefächert und teilt sich grundlegend in zwei Konzepte auf:
+        """
+    )
+
+    merkkasten(
+        "Die zwei Grundkonzepte der Explainable AI",
+        "• <b>1. Interpretierbarkeit 'By Design' (Intrinsisch):</b> Das Modell ist von vornherein so konstruiert, dass Menschen jeden Rechenschritt und die interne Logik direkt verstehen können — ganz ohne nachgelagerte Hilfsmodelle.<br>"
+        "• <b>2. Post-Hoc Erklärungen (Nachträglich):</b> Ein beliebig komplexes (Black Box-)Modell wird trainiert, und erst im Nachhinein analysieren externe Verfahren, wie das Modell zu seinen Entscheidungen gekommen ist.",
+        typ="definition",
+    )
+
+    st.markdown("---")
+    st.markdown("### 1 · Forschungsansätze 'By Design' (Intrinsische Interpretierbarkeit)")
+    st.markdown(
+        "Der Leitgedanke von *Interpretable Machine Learning by Design* lautet: **Warum eine Black Box mühsam von außen approximieren, wenn man direkt ein hochpräzises, verständliches Modell bauen kann?** *(Rudin, 2019)*."
+    )
+
+    col_bd1, col_bd2 = st.columns(2)
+
+    with col_bd1:
+        st.markdown("#### 🌲 Explainable Boosting Machines (EBM / GAMs)")
+        st.markdown(
+            """
+            **Generalized Additive Models (GAMs)** zerlegen Vorhersagen in die Summe einzelner Merkmalsfunktionen:
+            
+            $$g(E[y]) = \\beta_0 + f_1(x_1) + f_2(x_2) + \\dots + f_{ij}(x_i, x_j)$$
+            
+            - **Funktionsweise:** Für jedes Merkmal (und wichtige Interaktionen) wird eine separate, 1-dimensionale Kurve trainiert.
+            - **Vorteil:** Erreicht auf Tabellendaten oft die gleiche Performance wie XGBoost oder Random Forests, bleibt aber als exakter Funktionsgraph lesbar.
+            """
+        )
+
+        st.markdown("#### 🧩 Konzept-Flaschenhals-Modelle (CBMs)")
+        st.markdown(
+            """
+            - **Prinzip:** Tiefe neuronale Netze lernen zuerst menschlich verständliche Zwischenkonzepte (z. B. *„Schnabel gebogen?“*, *„Gelbe Federn?“*).
+            - **Entscheidung:** Erst aus diesen Konzepten trifft ein einfaches lineares Modell die Endklassifikation.
+            - **Intervention:** Fachexperten können bei Fehldiagnosen direkt an den Zwischenkonzepten eingreifen und Fehler korrigieren.
+            """
+        )
+
+    with col_bd2:
+        st.markdown("#### 🔍 Prototypen-Netzwerke (ProtoPNet)")
+        st.markdown(
+            """
+            - **Leitmotiv:** *„This looks like that“* – Entscheidungen werden durch Analogien zu repräsentativen Beispielen (Prototypen) begründet.
+            - **Bildverarbeitung:** Das Modell zeigt: *„Ich klassifiziere diesen Pinguin als Gentoo, weil dieser Ausschnitt dem Flügelprototyp #14 entspricht.“*
+            - **Transparenz:** Die Entscheidungsfindung ist direkt im Bildraum visuell nachvollziehbar.
+            """
+        )
+
+        st.markdown("#### 📋 Optimale Regellisten & Symbolische Regression")
+        st.markdown(
+            """
+            - **Optimale Entscheidungsbäume:** Moderne Solver (z. B. OSDT) finden mathematisch garantiert die kürzeste, lesbarste Regelmenge mit maximaler Treffsicherheit.
+            - **Symbolische Regression:** Findet exakte, physikalisch motivierte mathematische Gleichungen direkt aus den Daten via genetischer Programmierung.
+            """
+        )
+
+    st.markdown("---")
+    st.markdown("### 2 · Fortgeschrittene Post-Hoc Forschungsansätze")
+    st.markdown(
+        "Wenn bereits ein hochdimensionales Black-Box-Modell (z. B. Deep Neural Network, Vision Transformer oder LLM) existiert, kommen spezialisierte Post-Hoc Verfahren zum Einsatz:"
+    )
+
+    col_ph1, col_ph2 = st.columns(2)
+
+    with col_ph1:
+        st.markdown("#### 🔄 Kontrafaktische Erklärungen (Counterfactuals)")
+        st.markdown(
+            """
+            - **Fragestellung:** *„Was ist die kleinste minimale Änderung an den Merkmalen, damit das Modell seine Entscheidung ändert?“*
+            - **Beispiel Pinguin:** *„Wenn dieser Adelie-Pinguin nur 3 mm längere Schnabelmaße hätte, wäre er als Chinstrap klassifiziert worden.“*
+            - **Praxisnutzen:** Extrem wertvoll für Anwender (z. B. Kreditvergabe oder Medizin: *„Was muss sich konkret ändern, damit der Kredit bewilligt wird?“*).
+            """
+        )
+
+        st.markdown("#### 🎯 Anchor Explanations (Regel-Anker)")
+        st.markdown(
+            """
+            - **Prinzip:** Findet hinreichende Wenn-Dann-Bedingungen mit garantierter hoher Präzision (*Coverage & Precision*).
+            - **Beispiel:** *„WENN Flossenlänge > 215 mm UND Körpergewicht > 4800 g, DANN gilt zu 99% Gentoo — völlig egal, wie die restlichen Maße aussehen.“*
+            """
+        )
+
+    with col_ph2:
+        st.markdown("#### 🎨 Saliency Maps & Grad-CAM (Computer Vision)")
+        st.markdown(
+            """
+            - **Grad-CAM:** Berechnet Gradienten der Zielklasse bezüglich der letzten Faltungsschichten.
+            - **Visualisierung:** Eine farbige Heatmap zeigt pixelgenau, auf welche Bildbereiche das neuronale Netz für die Entscheidung „geschaut“ hat.
+            - **LRP (Layer-wise Relevance Propagation):** Propagiert Relevanzwerte deterministisch rückwärts durch alle Netzwerkschichten.
+            """
+        )
+
+        st.markdown("#### 🧠 Mechanistic Interpretability & Concept Vectors (TCAV)")
+        st.markdown(
+            """
+            - **TCAV:** Prüft, ob ein Modell intern abstrakte Konzepte (z. B. *„Streifenmuster“* oder *„Geschlecht“*) gelernt hat, ohne dass dafür Labels vorlagen.
+            - **Mechanistic Interpretability:** Untersucht neuronale Schaltkreise (Attention Heads, Induction Heads) in Sprachmodellen (LLMs) wie elektronische Schaltpläne.
+            """
+        )
+
+    st.markdown("---")
+    st.markdown("### 3 · Gegenüberstellung: By Design vs. Post-Hoc")
+
+    vergleich_data = {
+        "Kriterium": [
+            "Treue (Fidelity)",
+            "Modellflexibilität",
+            "Performance / Kapazität",
+            "Erklärungsaufwand",
+            "Typische Einsatzgebiete",
+        ],
+        "By Design (Intrinsisch)": [
+            "100 % exakt (Modell IST die Erklärung)",
+            "Eingeschränkt auf verständliche Architekturen",
+            "Exzellent bei Tabellendaten, schwieriger bei rohen Bildern/Audio",
+            "Kein zusätzlicher Rechenaufwand nach dem Training",
+            "Medizinische Diagnostik, Justiz, Kreditentscheidungen",
+        ],
+        "Post-Hoc (Nachträglich)": [
+            "Approximation / Näherung (Gefahr von Scheinerklärungen)",
+            "Universell modellagnostisch (jedes Modell nutzbar)",
+            "Höchste Kapazität (Deep Learning, LLMs, Ensembles)",
+            "Teilweise sehr hoher zusätzlicher Rechenaufwand (Sampling)",
+            "Computer Vision, NLP / LLMs, komplexe Ensembles",
+        ],
+    }
+    st.dataframe(pd.DataFrame(vergleich_data), hide_index=True, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("### 4 · Zentrale Herausforderungen der aktuellen XAI-Forschung")
+
+    merkkasten(
+        "Offene Fragen und zukünftige Forschungsfelder",
+        "• <b>1. Faithfulness vs. Plausibility:</b> Eine Erklärung kann für Menschen plausibel und schön aussehen, aber das tatsächliche (möglicherweise fehlerhafte) Modellverhalten verschleiern.<br>"
+        "• <b>2. Adversarial Robustness:</b> LIME- und SHAP-Erklärungen können durch gezielte Störungen manipuliert werden, um diskriminierende Modelle nach außen 'fair' wirken zu lassen.<br>"
+        "• <b>3. Kausalität statt Korrelation:</b> Reine Merkmalsattributionen zeigen Korrelationen, erfassen aber keine biologischen oder physikalischen Kausalzusammenhänge.<br>"
+        "• <b>4. Interpretierbarkeit von Large Language Models (LLMs):</b> Wie verstehen und steuern wir Milliarden von Parametern in generativen Modellen (Activation Steering, Chain-of-Thought)?",
+        typ="achtung",
+    )
+
+    st.markdown("---")
+    st.markdown("### 5 · Weiterführende Literatur zu modernen XAI-Ansätzen")
+    st.markdown(
+        """
+- **Rudin, C. (2019):** *Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead.* Nature Machine Intelligence, 1(5), 206–215. *(Plädoyer für By-Design Interpretierbarkeit)*
+- **Nori, H. et al. (2019):** *InterpretML: A Unified Framework for Machine Learning Interpretability.* arXiv:1909.09223. *(Explainable Boosting Machines / EBMs)*
+- **Selvaraju, R. R. et al. (2017):** *Grad-CAM: Visual Explanations from Deep Networks via Gradient-Based Localization.* ICCV 2017, 618–626.
+- **Kim, B. et al. (2018):** *Interpretability Beyond Feature Attribution: Quantitative Testing with Concept Activation Vectors (TCAV).* ICML 2018, 2668–2677.
+- **Wachter, S., Mittelstadt, B., & Russell, C. (2017):** *Counterfactual Explanations Without Opening the Black Box: Automated Decisions and the GDPR.* Harvard Journal of Law & Technology.
+- **Molnar, C. (2022):** *Interpretable Machine Learning: A Guide for Making Black Box Models Explainable.* (Frei online verfügbar).
+"""
     )
