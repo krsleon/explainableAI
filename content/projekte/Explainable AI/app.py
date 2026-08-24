@@ -80,4 +80,14 @@ with tab_daten:
     st.markdown(
         "Wir werden die Spalten `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, und `body_mass_g` als Features verwenden, um die Art der Pinguine vorherzusagen."
     )
-    
+
+with tab_blackbox:
+    st.markdown(
+        "Klassische, lineare Machine Learning Modelle bieten eine gewisse Interpretierbarkeit in ihren Entscheidungen, indem Koeffizienten und Verzweigungen direkt abzulesen sind."
+    )
+    st.markdown(
+        "Bei hochdimensionalen Modellen hingegen leidet die Interpretierbarkeit unter der besseren Performance – die Millionen nicht-linear verknüpften Parameter entziehen sich der menschlichen Intuition."
+    )
+    st.markdown(
+        "Aus diesem Grund spricht man von *Blackbox-Modellen*."
+    )
