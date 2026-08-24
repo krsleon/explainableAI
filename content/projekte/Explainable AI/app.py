@@ -171,8 +171,10 @@ with tab_lime:
         "Anschließend wird ein einfaches Modell (z.B. lineares Modell, Decision Tree) auf diesen Daten trainiert, um die Vorhersage des Black-Box-Modells zu erklären."
         "Es handelt sich um eine lokale Methode, da eine Erklärung nur für eine einzelne Vorhersage/Instanz - in unserem Beispiel für einen Pinguin - erzeugt wird, und nicht für das gesamte Modell."
     )
+    
+    st.markdown("### Anwendung auf einen Beispielpinguin")
     instance_idx = st.selectbox(
-    "Penguin to explain",
+    "Welchen Pinguin möchten wir genauer anschauen?",
     options=range(len(X_test)),
     # von jeder Art drei zur Auswahl geben.
     index=7
@@ -187,7 +189,7 @@ with tab_lime:
 
     st.write(f"**Tatsächliche Art:** {actual_class}")
     st.write(f"**Vorhergesagte Art:** {predicted_class}")
-    st.markdown("Feature values of the selected instance:")
+    st.markdown("Eigenschaften des gewählten Pinguins:")
     st.dataframe(
     X_test.iloc[[instance_idx]],
     hide_index=True,
@@ -247,8 +249,8 @@ with tab_lime:
     
     fig.update_layout(
     title=(
-        f"LIME explanation for {predicted_class}"
-        f"<br><sup>Kernel width = {kernel_width}</sup>"
+        f"LIME Erklärung für {predicted_class}"
+        f"<br><sup>Kernelbreite = {kernel_width}</sup>"
     ),
     height=400,
     showlegend=False
