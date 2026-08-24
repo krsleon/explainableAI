@@ -543,7 +543,7 @@ with tab_lime:
               dass dieses Merkmal die Vorhersage kausal verursacht.
             """
         )
-    st.warning(
+    st.info(
      """
      ⚠️ **Wichtig: Erklärung ≠ Kausalität**
 
@@ -583,8 +583,9 @@ with tab_lime:
     
     st.markdown("## Weiterführende Literatur")
     st.markdown(
-    "- <b>Why Should I Trust You?: Explaining the Predictions of Any Classifier</b>, Ribeiro et al., 2016."
-    "- <b>Interpretable Machine Learning</b>, Christoph Molnar, 2020."
+    "- **Why Should I Trust You?: Explaining the Predictions of Any Classifier**, Ribeiro et al., 2016. (erstes Paper zur LIME-Methode)")
+    st.markdown(
+    "- **Interpretable Machine Learning**, Christoph Molnar, 2020. (Anschauliches Buch zu interpretierbarer KI)"
     )
 
 
@@ -926,7 +927,7 @@ with tab_ausblick:
     )
     st.page_link("views/ml/explainable_ml.py", label="Globale xAI", icon="🗂️")
 
-    st.markdown("### Explainable AI für neuronale Netze")
+    st.markdown("### Beispiel für modellspezifische Methoden: Explainable AI für neuronale Netze")
 
     st.markdown(
         """
