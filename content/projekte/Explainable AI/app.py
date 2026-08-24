@@ -377,55 +377,55 @@ st.markdown(
     
     st.markdown("### Stärken und Schwächen von LIME")
 
-col1, col2 = st.columns(2)
-
-with col1:
-    st.success(
-        """
-        **✓ Stärken**
-
-        - **Modellunabhängig:** LIME benötigt keinen direkten Zugriff auf
-          die interne Struktur des Black-Box-Modells.
-
-        - **Lokale Erklärungen:** Es erklärt konkrete einzelne
-          Vorhersagen und kann dadurch sehr detaillierte Einzelfälle
-          untersuchen.
-
-        - **Intuitiv:** Die Beiträge einzelner Merkmale können als
-          positive oder negative Gewichte dargestellt werden.
-
-        - **Vielseitig:** Das Grundprinzip kann auf unterschiedliche
-          Datentypen und Modelle angewendet werden.
-
-        - **Einfach visualisierbar:** Die lokalen Feature-Beiträge lassen
-          sich beispielsweise als Balkendiagramm darstellen.
-        """
-    )
-
-with col2:
-    st.warning(
-        """
-        **⚠ Schwächen**
-
-        - **Lokale Methode:** Eine Erklärung für einen Pinguin sagt
-          nicht automatisch etwas über andere Pinguine aus.
-
-        - **Abhängigkeit von Hyperparametern:** Die Erklärung kann sich
-          beispielsweise mit der Kernel-Breite oder der Anzahl der
-          erzeugten Perturbationen verändern.
-
-        - **Stochastisch:** Durch die zufällige Erzeugung von
-          Perturbationen können sich Erklärungen zwischen verschiedenen
-          Läufen unterscheiden.
-
-        - **Surrogatmodell ist nur eine Approximation:** Das einfache
-          Modell muss das Black-Box-Modell nicht außerhalb der lokalen
-          Umgebung korrekt beschreiben.
-
-        - **Keine Kausalität:** Ein hoher Feature-Beitrag bedeutet nicht,
-          dass dieses Merkmal die Vorhersage kausal verursacht.
-        """
-    )
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.success(
+            """
+            **✓ Stärken**
+    
+            - **Modellunabhängig:** LIME benötigt keinen direkten Zugriff auf
+              die interne Struktur des Black-Box-Modells.
+    
+            - **Lokale Erklärungen:** Es erklärt konkrete einzelne
+              Vorhersagen und kann dadurch sehr detaillierte Einzelfälle
+              untersuchen.
+    
+            - **Intuitiv:** Die Beiträge einzelner Merkmale können als
+              positive oder negative Gewichte dargestellt werden.
+    
+            - **Vielseitig:** Das Grundprinzip kann auf unterschiedliche
+              Datentypen und Modelle angewendet werden.
+    
+            - **Einfach visualisierbar:** Die lokalen Feature-Beiträge lassen
+              sich beispielsweise als Balkendiagramm darstellen.
+            """
+        )
+    
+    with col2:
+        st.warning(
+            """
+            **⚠ Schwächen**
+    
+            - **Lokale Methode:** Eine Erklärung für einen Pinguin sagt
+              nicht automatisch etwas über andere Pinguine aus.
+    
+            - **Abhängigkeit von Hyperparametern:** Die Erklärung kann sich
+              beispielsweise mit der Kernel-Breite oder der Anzahl der
+              erzeugten Perturbationen verändern.
+    
+            - **Stochastisch:** Durch die zufällige Erzeugung von
+              Perturbationen können sich Erklärungen zwischen verschiedenen
+              Läufen unterscheiden.
+    
+            - **Surrogatmodell ist nur eine Approximation:** Das einfache
+              Modell muss das Black-Box-Modell nicht außerhalb der lokalen
+              Umgebung korrekt beschreiben.
+    
+            - **Keine Kausalität:** Ein hoher Feature-Beitrag bedeutet nicht,
+              dass dieses Merkmal die Vorhersage kausal verursacht.
+            """
+        )
     st.info(
     """
     💡 **LIME ist nicht auf Tabellendaten beschränkt**
