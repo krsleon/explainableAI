@@ -366,8 +366,6 @@ with tab_lime:
         orientation="h",
         title=f"LIME Erklärung für Vorhersage: {predicted_class} (Kernelbreite = {kernel_width})",
         labels={"Beitrag zur Vorhersage": "Lokaler Beitrag (Koeffizient)", "Feature": "Merkmal"},
-        color="Beitrag zur Vorhersage",
-        color_continuous_scale=["#3E6DB5", "#E8804C"],
     )
     fig_lime.add_vline(x=0, line_width=2, line_color="black")
     fig_lime.update_layout(height=380, showlegend=False)
@@ -754,5 +752,3 @@ with tab_ausblick:
         "• <b>4. Interpretierbarkeit von Large Language Models (LLMs):</b> Analyse und Steuerung von Milliarden Parametern in generativen Modellen (Mechanistic Interpretability, Chain-of-Thought).",
         typ="achtung",
     )
-
-    st.markdown("---")
